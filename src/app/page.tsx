@@ -144,7 +144,6 @@ export default function ReplacleGame() {
           variant="contained" 
           size="large" 
           onClick={startGame}
-          startIcon={<SportsEsportsIcon />}
           disabled={startingWords.length === 0}
         >
           {startingWords.length === 0 ? "Loading Dictionary..." : "Start Game"}
