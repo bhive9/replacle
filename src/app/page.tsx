@@ -1,69 +1,300 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import {
+  Container,
+  Typography,
+  Button,
+  Box,
+  Paper,
+  Chip,
+  Alert,
+  Fade,
+  IconButton,
+  OutlinedInput,
+} from "@mui/material";
+import SendIcon from "@mui/icons-material/Send";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import HistoryIcon from "@mui/icons-material/History";
+import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import { GameState, INITIAL_STATE, isOneLetterDifferent, checkGameOver } from "@/lib/game-logic";
+
+export default function ReplacleGame() {
+  const [gameState, setGameState] = useState<GameState>(INITIAL_STATE);
+  const [input, setInput] = useState("");
+  const [dictionary, setDictionary] = useState<Set<string>>(new Set());
+  const [startingWords, setStartingWords] = useState<string[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Load word lists
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [dictRes, startRes] = await Promise.all([
+          fetch("/data/dictionary.txt"),
+          fetch("/data/starting_words.txt"),
+        ]);
+        const dictText = await dictRes.text();
+        const startText = await startRes.text();
+        
+        setDictionary(new Set(dictText.split("\n").map(w => w.trim().toLowerCase())));
+        setStartingWords(startText.split("\n").map(w => w.trim().toLowerCase()).filter(w => w.length === 4));
+      } catch (err) {
+        console.error("Failed to load game data", err);
+      }
+    }
+    loadData();
+  }, []);
+
+  const startGame = useCallback(() => {
+    if (startingWords.length === 0) return;
+    const randomWord = startingWords[Math.floor(Math.random() * startingWords.length)];
+    setGameState({
+      history: [randomWord],
+      currentPlayer: 1,
+      status: "playing",
+      winner: null,
+      error: null,
+    });
+    setInput("");
+  }, [startingWords]);
+
+  const handleMove = () => {
+    const word = input.trim().toLowerCase();
+    const lastWord = gameState.history[gameState.history.length - 1];
+
+    // Validation
+    if (word.length !== 4) {
+      setGameState(s => ({ ...s, error: "Word must be 4 letters long!" }));
+      return;
+    }
+    if (gameState.history.includes(word)) {
+      setGameState(s => ({ ...s, error: "Word already used!" }));
+      return;
+    }
+    if (!dictionary.has(word)) {
+      setGameState(s => ({ ...s, error: "Not a valid word in TWL06!" }));
+      return;
+    }
+    if (!isOneLetterDifferent(lastWord, word)) {
+      setGameState(s => ({ ...s, error: "Must change exactly one letter!" }));
+      return;
+    }
+
+    // Valid move - check if game is over (next player has no moves)
+    const newHistory = [...gameState.history, word];
+    const gameOver = checkGameOver(word, dictionary, newHistory);
+    
+    setGameState(s => ({
+      ...s,
+      history: newHistory,
+      currentPlayer: s.currentPlayer === 1 ? 2 : 1,
+      status: gameOver ? "game_over" : "playing",
+      winner: gameOver ? s.currentPlayer : null,
+      error: null,
+    }));
+    setInput("");
+  };
+
+  // Auto-scroll history
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [gameState.history]);
+
+  if (gameState.status === "game_over") {
+    return (
+      <Container maxWidth="sm" sx={{ py: 10, textAlign: "center" }}>
+        <Typography variant="h1" gutterBottom color="secondary">
+          Replacle
+        </Typography>
+        <Typography variant="h2" gutterBottom color="success.main" sx={{ mt: 2 }}>
+          🎉 Player {gameState.winner} Wins!
+        </Typography>
+        <Typography variant="body1" sx={{ mb: 2, color: "text.secondary" }}>
+          No valid moves left for Player {gameState.winner === 1 ? 2 : 1}.
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 4, color: "text.secondary" }}>
+          Total words played: {gameState.history.length}
+        </Typography>
+        <Button 
+          variant="contained" 
+          size="large" 
+          onClick={startGame}
+          startIcon={<RefreshIcon />}
+        >
+          Play Again
+        </Button>
+      </Container>
+    );
+  }
+
+  if (gameState.status === "setup") {
+    return (
+      <Container maxWidth="sm" sx={{ py: 10, textAlign: "center" }}>
+        <Typography variant="h1" gutterBottom color="secondary">
+          Replacle
+        </Typography>
+        <Typography variant="body1" sx={{ mb: 4, color: "text.secondary" }}>
+          The 2-player word replacement game. Change one letter, make a word, don't repeat.
+        </Typography>
+        <Button 
+          variant="contained" 
+          size="large" 
+          onClick={startGame}
+          startIcon={<SportsEsportsIcon />}
+          disabled={startingWords.length === 0}
+        >
+          {startingWords.length === 0 ? "Loading Dictionary..." : "Start Game"}
+        </Button>
+      </Container>
+    );
+  }
+
+  const currentWord = gameState.history[gameState.history.length - 1];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <Container maxWidth="sm" sx={{ py: 4, height: "100vh", display: "flex", flexDirection: "column" }}>
+      {/* Header */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+        <Typography variant="h3" color="secondary" sx={{ m: 0 }}>Replacle</Typography>
+        <IconButton onClick={startGame} title="Reset Game">
+          <RefreshIcon />
+        </IconButton>
+      </Box>
+
+      {/* Player Turn Indicator */}
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          p: 2, mb: 3, textAlign: "center", borderRadius: 4,
+          bgcolor: gameState.currentPlayer === 1 ? "primary.main" : "secondary.main",
+          color: "white",
+          transition: "all 0.3s ease"
+        }}
+      >
+        <Typography variant="h3" sx={{ m: 0 }}>
+          Player {gameState.currentPlayer}&apos;s Turn
+        </Typography>
+      </Paper>
+
+      {/* Current Word Display */}
+      <Box sx={{ textAlign: "center", mb: 4, py: 4, border: "2px dashed", borderColor: "primary.main", borderRadius: 4 }}>
+        <Typography variant="caption" sx={{ textTransform: "uppercase", letterSpacing: 2 }}>Current Word</Typography>
+        <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mt: 1 }}>
+          {currentWord.split("").map((char, i) => (
+            <Paper 
+              key={i} 
+              elevation={2} 
+              sx={{ 
+                width: 60, height: 70, display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: "2.5rem", fontWeight: "bold", bgcolor: "white", borderRadius: 2
+              }}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+              {char.toUpperCase()}
+            </Paper>
+          ))}
+        </Box>
+      </Box>
+
+      {/* History */}
+      <Box sx={{ flexGrow: 1, overflow: "hidden", display: "flex", flexDirection: "column", mb: 3 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+          <HistoryIcon fontSize="small" color="disabled" />
+          <Typography variant="body2" color="text.secondary">Game History</Typography>
+        </Box>
+        <Box 
+          ref={scrollRef}
+          sx={{ 
+            flexGrow: 1, overflowY: "auto", pr: 1,
+            display: "flex", flexDirection: "column", gap: 1 
+          }}
+        >
+          {gameState.history.map((word, i) => (
+            <Fade in key={i}>
+              <Box sx={{ display: "flex", justifyContent: i % 2 === 0 ? "flex-start" : "flex-end" }}>
+                <Chip 
+                  label={word.toUpperCase()} 
+                  variant={i === gameState.history.length - 1 ? "filled" : "outlined"}
+                  color={i % 2 === 0 ? "primary" : "secondary"}
+                  sx={{ fontSize: "1.1rem", height: 36, fontWeight: 600 }}
+                />
+              </Box>
+            </Fade>
+          ))}
+        </Box>
+      </Box>
+
+      {/* Input */}
+      <Box sx={{ pb: 2 }}>
+        {gameState.error && (
+          <Alert severity="error" sx={{ mb: 2, borderRadius: 3 }} onClose={() => setGameState(s => ({ ...s, error: null }))}>
+            {gameState.error}
+          </Alert>
+        )}
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <OutlinedInput
+            fullWidth
+            placeholder="Type next word..."
+            value={input}
+            onChange={(e) => {
+              setInput(e.target.value.slice(0, 4).toUpperCase());
+              if (gameState.error) setGameState(s => ({ ...s, error: null }));
+            }}
+            onKeyDown={(e) => e.key === "Enter" && handleMove()}
+            autoFocus
+            sx={{ 
+              borderRadius: 3, 
+              bgcolor: "white", 
+              height: 52,
+              fontSize: "1.25rem",
+              letterSpacing: 2,
+              textTransform: "uppercase",
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderWidth: 2,
+              },
+              "&:hover .MuiOutlinedInput-notchedOutline": {
+                borderWidth: 2,
+              },
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderWidth: 3,
+              },
+            }}
+            inputProps={{ maxLength: 4, style: { textAlign: "center" } }}
+          />
+          <Button
+            variant="contained"
+            onClick={handleMove}
+            disabled={!input.trim()}
+            sx={{
+              height: 52,
+              minWidth: 52,
+              borderRadius: 3,
+              padding: 0,
+              boxShadow: 3,
+              transition: "all 0.2s ease",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              "&:hover:not(:disabled)": {
+                transform: "scale(1.05)",
+                boxShadow: 4,
+              },
+              "&:active:not(:disabled)": {
+                transform: "scale(0.98)",
+              },
+              "&:disabled": {
+                opacity: 0.4,
+              },
+            }}
+            aria-label="Submit word"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <ArrowUpwardIcon fontSize="large" />
+          </Button>
+        </Box>
+      </Box>
+    </Container>
   );
 }
