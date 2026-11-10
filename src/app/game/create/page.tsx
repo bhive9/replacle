@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Container,
   Typography,
@@ -16,23 +16,48 @@ import {
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 export default function CreateRoomPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CreateRoomContent />
+    </Suspense>
+  );
+}
+
+function CreateRoomContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [playerName, setPlayerName] = useState("Player1");
-  const [roomId, setRoomId] = useState<string | null>(null);
+  const [roomId, setRoomId] = useState("");
+  const [roomUrl, setRoomUrl] = useState("");
 
-  const handleCreate = useCallback(async () => {
-    // Generate a room ID and set it
-    const newRoomId = Math.random().toString(36).substring(7);
-    setRoomId(newRoomId);
-    // Navigate to the game room with the name as a query parameter
-    router.push(`/game/${newRoomId}?name=${encodeURIComponent(playerName)}`);
-  }, [playerName, router]);
-
-  const copyRoomId = useCallback(() => {
-    if (roomId) {
-      navigator.clipboard.writeText(roomId);
+  // Create room immediately on load
+  useEffect(() => {
+    async function initRoom() {
+      try {
+        const res = await fetch("/api/v1/game", { method: "POST" });
+        const data = await res.json();
+        if (res.ok && data.roomId) {
+          setRoomId(data.roomId);
+          const fullUrl = `${window.location.origin}/game/join/${data.roomId}`;
+          setRoomUrl(fullUrl);
+        }
+      } catch (err) {
+        console.error("Failed to create room", err);
+      }
     }
-  }, [roomId]);
+    initRoom();
+  }, []);
+
+  const copyRoomUrl = useCallback(() => {
+    if (roomUrl) {
+      navigator.clipboard.writeText(roomUrl);
+    }
+  }, [roomUrl]);
+
+  const handleJoin = useCallback(() => {
+    if (!roomId) return;
+    router.push(`/game/${roomId}?name=${encodeURIComponent(playerName)}`);
+  }, [roomId, playerName, router]);
 
   return (
     <Container maxWidth="sm" sx={{ py: 10, textAlign: "center" }}>
@@ -40,31 +65,28 @@ export default function CreateRoomPage() {
         <Typography variant="h3" color="secondary" gutterBottom>
           Create Room
         </Typography>
-        
+
         {roomId && (
           <Box sx={{ mb: 3 }}>
-            <Typography variant="body1" sx={{ mb: 1 }}>
-              Room ID:
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              Shareable Join URL:
             </Typography>
             <Input
-              value={roomId}
+              value={roomUrl}
               readOnly
+              fullWidth
               sx={{
                 fontFamily: "monospace",
-                fontSize: "1rem",
+                fontSize: "0.9rem",
                 bgcolor: "white",
                 borderRadius: 2,
-                "&:hover": {
-                  bgcolor: "grey.50",
-                },
+                p: 1,
+                border: "2px dotted",
+                borderColor: "primary.main",
               }}
               endAdornment={
-                <Tooltip title="Copy room ID">
-                  <IconButton
-                    onClick={copyRoomId}
-                    size="small"
-                    sx={{ ml: 1 }}
-                  >
+                <Tooltip title="Copy full URL">
+                  <IconButton onClick={copyRoomUrl} size="small" sx={{ ml: 1 }}>
                     <ContentCopyIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
@@ -72,7 +94,7 @@ export default function CreateRoomPage() {
             />
           </Box>
         )}
-        
+
         <TextField
           fullWidth
           label="Your Name"
@@ -85,7 +107,8 @@ export default function CreateRoomPage() {
           variant="contained" 
           size="large" 
           color="secondary"
-          onClick={handleCreate}
+          onClick={handleJoin}
+          disabled={!roomId}
           fullWidth
         >
           Join Room
