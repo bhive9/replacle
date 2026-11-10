@@ -200,6 +200,7 @@ export default function ReplacleGame() {
           The 2-player word replacement game. Change one letter, make a word, don't repeat.
         </Typography>
         <Button 
+        <Button 
           variant="contained"
           size="large" 
           onClick={startGame}
@@ -210,12 +211,12 @@ export default function ReplacleGame() {
         </Button>
         <Box sx={{ mt: 2 }}>
           <Button 
-            variant="outlined"
+            variant="contained"
             size="large"
             href="/game/create"
             color="secondary"
           >
-            Create Multiplayer Room
+            Create Room
           </Button>
         </Box>
       </Container>
