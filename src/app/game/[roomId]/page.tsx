@@ -51,6 +51,7 @@ function ReplacleMultiplayerInner() {
   const [playerNumber, setPlayerNumber] = useState<1 | 2 | null>(null);
   const [playerToken, setPlayerToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [localTimeRemaining, setLocalTimeRemaining] = useState<number>(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const turnStartRef = useRef<number | null>(null);
@@ -68,30 +69,31 @@ function ReplacleMultiplayerInner() {
       return;
     }
 
+    // Set initial time
+    const elapsed = Math.floor((Date.now() - gameState.turnStartTime!) / 1000);
+    const remaining = Math.max(0, TURN_TIME_LIMIT - elapsed);
+    setLocalTimeRemaining(remaining);
+
     timerRef.current = setInterval(() => {
       const elapsed = Math.floor((Date.now() - gameState.turnStartTime!) / 1000);
       const remaining = Math.max(0, TURN_TIME_LIMIT - elapsed);
 
-      setGameState(s => {
-        if (!s || s.status !== "playing") return s;
-        if (remaining <= 0) {
-          clearInterval(timerRef.current!);
-          timerRef.current = null;
+      setLocalTimeRemaining(remaining);
+      
+      if (remaining <= 0) {
+        clearInterval(timerRef.current!);
+        timerRef.current = null;
+        setGameState(s => {
+          if (!s || s.status !== "playing") return s;
           return {
             ...s,
             status: "game_over",
             winner: s.currentPlayer === 1 ? 2 : 1,
             timeRemaining: 0,
           };
-        }
-        return { ...s, timeRemaining: remaining };
-      });
+        });
+      }
     }, 1000);
-
-    // Initial run
-    const elapsed = Math.floor((Date.now() - gameState.turnStartTime!) / 1000);
-    const remaining = Math.max(0, TURN_TIME_LIMIT - elapsed);
-    setGameState(s => (!s || s.status !== "playing") ? s : { ...s, timeRemaining: remaining });
 
     return () => {
       if (timerRef.current) {
@@ -274,10 +276,10 @@ function ReplacleMultiplayerInner() {
         <Typography variant="h3" sx={{ m: 0, color: "inherit" }}>
           {isMyTurn ? "Your Turn" : `Player ${gameState.currentPlayer}'s Turn`}
         </Typography>
-        {/* Timer visible when both players have joined (game is playing) */}
-        {gameState.status === "playing" && (
+        {/* Timer visible when both players have joined (game is playing) and gameState is active */}
+        {gameState?.status === "playing" && localTimeRemaining > 0 && (
           <Typography variant="h3" sx={{ m: 0, color: "inherit", fontWeight: 700 }}>
-            {gameState.timeRemaining}s
+            {localTimeRemaining}s
           </Typography>
         )}
       </Paper>
