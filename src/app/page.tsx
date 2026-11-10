@@ -206,14 +206,14 @@ export default function ReplacleGame() {
           onClick={startGame}
           disabled={startingWords.length === 0}
           sx={{
-            bgcolor: "#263D5B",
+            bgcolor: "secondary.main",
             color: "white",
             "&:hover:not(:disabled)": {
-              bgcolor: "#1a2e4a",
+              bgcolor: "secondary.main",
             },
             "&:disabled": {
-              bgcolor: "#5a6478",
-              color: "#ffffff80",
+              bgcolor: "grey.100",
+              color: "grey.500",
             },
           }}
         >
@@ -225,10 +225,10 @@ export default function ReplacleGame() {
             size="large"
             href="/game/create"
             sx={{
-              bgcolor: "#263D5B",
+              bgcolor: "secondary.main",
               color: "white",
               "&:hover": {
-                bgcolor: "#1a2e4a",
+                bgcolor: "secondary.main",
               },
             }}
           >
