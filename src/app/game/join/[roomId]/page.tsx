@@ -9,7 +9,6 @@ import {
   Box,
   TextField,
   Paper,
-  Input,
   IconButton,
   Tooltip,
 } from "@mui/material";
@@ -49,27 +48,29 @@ function JoinRoomContent() {
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             Room ID:
           </Typography>
-          <Input
-            value={roomId}
-            readOnly
-            fullWidth
+          <Box
             sx={{
               fontFamily: "monospace",
               fontSize: "1rem",
               bgcolor: "white",
               borderRadius: 2,
-              p: 1,
+              p: 2,
               border: "2px dotted",
               borderColor: "secondary.main",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
-            endAdornment={
-              <Tooltip title="Copy Room ID">
-                <IconButton onClick={copyRoomId} size="small" sx={{ ml: 1 }}>
-                  <ContentCopyIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            }
-          />
+          >
+            <Typography variant="body1" sx={{ fontFamily: "monospace", fontWeight: 600 }}>
+              {roomId}
+            </Typography>
+            <Tooltip title="Copy Room ID">
+              <IconButton onClick={copyRoomId} size="small">
+                <ContentCopyIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Box>
 
         <TextField
