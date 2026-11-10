@@ -208,6 +208,16 @@ export default function ReplacleGame() {
         >
           {startingWords.length === 0 ? "Loading Dictionary..." : "Start Game"}
         </Button>
+        <Box sx={{ mt: 2 }}>
+          <Button 
+            variant="outlined"
+            size="large"
+            href="/game/create"
+            color="primary"
+          >
+            Create Multiplayer Room
+          </Button>
+        </Box>
       </Container>
     );
   }
