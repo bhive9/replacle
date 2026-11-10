@@ -124,7 +124,7 @@ export default function ReplacleGame() {
       return;
     }
     if (!dictionary.has(word)) {
-      setGameState(s => ({ ...s, error: "Not a valid word in TWL06!" }));
+      setGameState(s => ({ ...s, error: "That's not in my dictionary!" }));
       return;
     }
     if (!isOneLetterDifferent(lastWord, word)) {
