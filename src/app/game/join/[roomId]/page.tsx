@@ -56,7 +56,7 @@ function JoinRoomContent() {
               borderRadius: 2,
               p: 2,
               border: "2px dashed",
-              borderColor: "primary.main",
+              borderColor: "secondary.main",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
