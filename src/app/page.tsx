@@ -227,6 +227,7 @@ export default function ReplacleGame() {
             variant="contained" 
             size="large" 
             onClick={handleCreate}
+            color="secondary"
             fullWidth
           >
             Create Room
