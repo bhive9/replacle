@@ -225,34 +225,26 @@ export default function ReplacleGame() {
       </Box>
 
       {/* Player Turn Indicator + Timer */}
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-              <Paper 
-                elevation={0} 
-                sx={{ 
-                  p: 2, textAlign: "center", borderRadius: 4, flex: 1,
-                  bgcolor: gameState.currentPlayer === 1 ? "primary.main" : "secondary.main",
-                  color: "white",
-                  transition: "all 0.3s ease"
-                }}
-              >
-                <Typography variant="h3" sx={{ m: 0 }}>
-                  Player {gameState.currentPlayer}'s Turn
-                </Typography>
-              </Paper>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2, textAlign: "center", borderRadius: 4, minWidth: 100,
-                  bgcolor: gameState.timeRemaining <= 5 ? "error.main" : "grey.100",
-                  color: gameState.timeRemaining <= 5 ? "white" : "text.primary",
-                  transition: "all 0.3s ease",
-                  fontWeight: 700,
-                  fontSize: "1.5rem",
-                }}
-              >
-                {gameState.timeRemaining}s
-              </Paper>
-            </Box>
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          p: 2, mb: 3, borderRadius: 4,
+          bgcolor: gameState.currentPlayer === 1 ? "primary.main" : "secondary.main",
+          color: "white",
+          transition: "all 0.3s ease",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          px: 3,
+        }}
+      >
+        <Typography variant="h3" sx={{ m: 0, color: "inherit" }}>
+          Player {gameState.currentPlayer}'s Turn
+        </Typography>
+        <Typography variant="h3" sx={{ m: 0, color: "inherit", fontWeight: 700 }}>
+          {gameState.timeRemaining}s
+        </Typography>
+      </Paper>
 
       {/* Current Word Display */}
       <Box sx={{ textAlign: "center", mb: 4, py: 4, border: "2px dashed", borderColor: "primary.main", borderRadius: 4 }}>
