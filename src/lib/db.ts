@@ -14,6 +14,7 @@ db.exec(`
     winner INTEGER,
     player1Token TEXT NOT NULL,
     player2Token TEXT,
+    timer INTEGER,
     lastUpdated INTEGER NOT NULL
   )
 `);
@@ -44,14 +45,15 @@ export const dbStore = {
       winner: row.winner as any,
       player1Token: row.player1Token,
       player2Token: row.player2Token,
+      timer: row.timer,
       lastUpdated: row.lastUpdated,
     };
   },
 
   saveRoom(room: RoomRecord) {
     const stmt = db.prepare(`
-      INSERT OR REPLACE INTO rooms (roomId, history, currentPlayer, status, winner, player1Token, player2Token, lastUpdated)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT OR REPLACE INTO rooms (roomId, history, currentPlayer, status, winner, player1Token, player2Token, timer, lastUpdated)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     stmt.run(
       room.roomId,
@@ -61,6 +63,7 @@ export const dbStore = {
       room.winner ?? null,
       room.player1Token,
       room.player2Token ?? null,
+      room.timer ?? null,
       room.lastUpdated
     );
   }

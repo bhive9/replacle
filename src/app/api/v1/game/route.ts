@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
       winner: null,
       player1Token,
       player2Token: null,
+      timer: 30,
       lastUpdated: Date.now(),
     };
 
