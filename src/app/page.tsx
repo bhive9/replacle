@@ -125,12 +125,14 @@ export default function ReplacleGame() {
           onClick={startGame}
           startIcon={<RefreshIcon />}
           sx={{
-            bgcolor: "linear-gradient(135deg, #263D5B 0%, #1a2e4a 100%)",
+            bgcolor: "white",
+            color: "primary.main",
+            border: "2px solid",
+            borderColor: "primary.main",
             "&:hover": {
-              bgcolor: "linear-gradient(135deg, #1a2e4a 0%, #263D5B 100%)",
-              boxShadow: "0 8px 22px rgba(38, 61, 91, 0.28)",
+              bgcolor: "primary.main",
+              color: "white",
             },
-            boxShadow: "0 4px 14px rgba(38, 61, 91, 0.18)",
           }}
         >
           Play Again
@@ -154,12 +156,19 @@ export default function ReplacleGame() {
           onClick={startGame}
           disabled={startingWords.length === 0}
           sx={{
-            bgcolor: "linear-gradient(135deg, #263D5B 0%, #1a2e4a 100%)",
+            bgcolor: "white",
+            color: "primary.main",
+            border: "2px solid",
+            borderColor: "primary.main",
             "&:hover:not(:disabled)": {
-              bgcolor: "linear-gradient(135deg, #1a2e4a 0%, #263D5B 100%)",
-              boxShadow: "0 8px 22px rgba(38, 61, 91, 0.28)",
+              bgcolor: "primary.main",
+              color: "white",
             },
-            boxShadow: "0 4px 14px rgba(38, 61, 91, 0.18)",
+            "&:disabled": {
+              bgcolor: "grey.100",
+              color: "grey.500",
+              borderColor: "grey.300",
+            },
           }}
         >
           {startingWords.length === 0 ? "Loading Dictionary..." : "Start Game"}
