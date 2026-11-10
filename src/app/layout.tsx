@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Delius_Swash_Caps, JetBrains_Mono } from "next/font/google";
+import { Montserrat, JetBrains_Mono } from "next/font/google";
 import ThemeRegistry from "./theme-provider";
 import "./globals.css";
 
-const delius = Delius_Swash_Caps({
-  weight: "400",
+const montserrat = Montserrat({
+  weight: ["400", "500", "700"],
   subsets: ["latin"],
-  variable: "--font-delius",
+  variable: "--font-montserrat",
 });
 
 const jetbrains = JetBrains_Mono({
@@ -38,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${delius.variable} ${jetbrains.variable}`}>
+    <html lang="en" className={`${montserrat.variable} ${jetbrains.variable}`}>
       <body>
         <ThemeRegistry>{children}</ThemeRegistry>
       </body>
