@@ -18,7 +18,7 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import HistoryIcon from "@mui/icons-material/History";
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { GameState, INITIAL_STATE, isOneLetterDifferent, checkGameOver } from "@/lib/game-logic";
+import { GameState, INITIAL_STATE, isOneLetterDifferent, checkGameOver, TURN_TIME_LIMIT } from "@/lib/game-logic";
 
 export default function ReplacleGame() {
   const [gameState, setGameState] = useState<GameState>(INITIAL_STATE);
@@ -26,6 +26,52 @@ export default function ReplacleGame() {
   const [dictionary, setDictionary] = useState<Set<string>>(new Set());
   const [startingWords, setStartingWords] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const turnStartRef = useRef<number | null>(null);
+
+  // Timer countdown effect
+  useEffect(() => {
+    if (gameState.status !== "playing" || gameState.turnStartTime === null) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      return;
+    }
+
+    const updateTimer = () => {
+      const elapsed = Math.floor((Date.now() - (gameState.turnStartTime ?? Date.now())) / 1000);
+      const remaining = Math.max(0, TURN_TIME_LIMIT - elapsed);
+      
+      setGameState(s => {
+        if (s.status !== "playing") return s;
+        if (remaining <= 0) {
+          // Time's up - current player loses
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+          }
+          return {
+            ...s,
+            status: "game_over",
+            winner: s.currentPlayer === 1 ? 2 : 1,
+            timeRemaining: 0,
+          };
+        }
+        return { ...s, timeRemaining: remaining };
+      });
+    };
+
+    updateTimer();
+    timerRef.current = setInterval(updateTimer, 1000);
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [gameState.status, gameState.turnStartTime]);
 
   // Load word lists
   useEffect(() => {
@@ -50,14 +96,18 @@ export default function ReplacleGame() {
   const startGame = useCallback(() => {
     if (startingWords.length === 0) return;
     const randomWord = startingWords[Math.floor(Math.random() * startingWords.length)];
+    const now = Date.now();
     setGameState({
       history: [randomWord],
       currentPlayer: 1,
       status: "playing",
       winner: null,
       error: null,
+      turnStartTime: now,
+      timeRemaining: TURN_TIME_LIMIT,
     });
     setInput("");
+    turnStartRef.current = now;
   }, [startingWords]);
 
   const handleMove = () => {
@@ -93,8 +143,13 @@ export default function ReplacleGame() {
       status: gameOver ? "game_over" : "playing",
       winner: gameOver ? s.currentPlayer : null,
       error: null,
+      turnStartTime: gameOver ? null : Date.now(),
+      timeRemaining: gameOver ? 0 : TURN_TIME_LIMIT,
     }));
     setInput("");
+    if (!gameOver) {
+      turnStartRef.current = Date.now();
+    }
   };
 
   // Auto-scroll history
@@ -105,6 +160,7 @@ export default function ReplacleGame() {
   }, [gameState.history]);
 
   if (gameState.status === "game_over") {
+    const isTimeout = gameState.timeRemaining === 0;
     return (
       <Container maxWidth="sm" sx={{ py: 10, textAlign: "center" }}>
         <Typography variant="h1" gutterBottom color="secondary">
@@ -114,7 +170,9 @@ export default function ReplacleGame() {
           🎉 Player {gameState.winner} Wins!
         </Typography>
         <Typography variant="body1" sx={{ mb: 2, color: "text.secondary" }}>
-          No valid moves left for Player {gameState.winner === 1 ? 2 : 1}.
+          {isTimeout
+            ? `Player ${gameState.winner === 1 ? 2 : 1} ran out of time!`
+            : `No valid moves left for Player ${gameState.winner === 1 ? 2 : 1}.`}
         </Typography>
         <Typography variant="body2" sx={{ mb: 4, color: "text.secondary" }}>
           Total words played: {gameState.history.length}
@@ -166,20 +224,35 @@ export default function ReplacleGame() {
         </IconButton>
       </Box>
 
-      {/* Player Turn Indicator */}
-      <Paper 
-        elevation={0} 
-        sx={{ 
-          p: 2, mb: 3, textAlign: "center", borderRadius: 4,
-          bgcolor: gameState.currentPlayer === 1 ? "primary.main" : "secondary.main",
-          color: "white",
-          transition: "all 0.3s ease"
-        }}
-      >
-        <Typography variant="h3" sx={{ m: 0 }}>
-          Player {gameState.currentPlayer}&apos;s Turn
-        </Typography>
-      </Paper>
+      {/* Player Turn Indicator + Timer */}
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  p: 2, textAlign: "center", borderRadius: 4, flex: 1,
+                  bgcolor: gameState.currentPlayer === 1 ? "primary.main" : "secondary.main",
+                  color: "white",
+                  transition: "all 0.3s ease"
+                }}
+              >
+                <Typography variant="h3" sx={{ m: 0 }}>
+                  Player {gameState.currentPlayer}'s Turn
+                </Typography>
+              </Paper>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2, textAlign: "center", borderRadius: 4, minWidth: 100,
+                  bgcolor: gameState.timeRemaining <= 5 ? "error.main" : "grey.100",
+                  color: gameState.timeRemaining <= 5 ? "white" : "text.primary",
+                  transition: "all 0.3s ease",
+                  fontWeight: 700,
+                  fontSize: "1.5rem",
+                }}
+              >
+                {gameState.timeRemaining}s
+              </Paper>
+            </Box>
 
       {/* Current Word Display */}
       <Box sx={{ textAlign: "center", mb: 4, py: 4, border: "2px dashed", borderColor: "primary.main", borderRadius: 4 }}>

@@ -17,6 +17,8 @@ export interface GameState {
   status: GameStatus;
   winner: 1 | 2 | null;
   error: string | null;
+  turnStartTime: number | null;
+  timeRemaining: number;
 }
 
 export const INITIAL_STATE: GameState = {
@@ -25,7 +27,11 @@ export const INITIAL_STATE: GameState = {
   status: "setup",
   winner: null,
   error: null,
+  turnStartTime: null,
+  timeRemaining: 30,
 };
+
+export const TURN_TIME_LIMIT = 30;
 
 export function getValidMoves(currentWord: string, dictionary: Set<string>, history: string[]): string[] {
   const moves: string[] = [];
