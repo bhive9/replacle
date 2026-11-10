@@ -219,6 +219,7 @@ export default function ReplacleGame() {
           onClick={startGame}
           disabled={startingWords.length === 0}
           color="secondary"
+          fullWidth
         >
           {startingWords.length === 0 ? "Loading Dictionary..." : "Start Game"}
         </Button>

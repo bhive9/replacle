@@ -56,6 +56,15 @@ function ReplacleMultiplayerInner() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const turnStartRef = useRef<number | null>(null);
 
+  // Keep turnStartTime updated in ref to avoid stale closures
+  useEffect(() => {
+    if (gameState?.status === "playing" && gameState?.turnStartTime !== null) {
+      turnStartRef.current = gameState.turnStartTime;
+    } else {
+      turnStartRef.current = null;
+    }
+  }, [gameState?.status, gameState?.turnStartTime]);
+
   // Timer countdown effect
   useEffect(() => {
     // Clean up any existing interval
@@ -65,17 +74,24 @@ function ReplacleMultiplayerInner() {
     }
 
     // Only start timer when game is in playing state and has turnStartTime
-    if (gameState?.status !== "playing" || gameState?.turnStartTime === null) {
+    if (gameState?.status !== "playing" || !turnStartRef.current) {
       return;
     }
 
-    // Set initial time
-    const elapsed = Math.floor((Date.now() - gameState.turnStartTime!) / 1000);
+    // Set initial time using the ref to avoid stale gameState closure
+    const elapsed = Math.floor((Date.now() - turnStartRef.current) / 1000);
     const remaining = Math.max(0, TURN_TIME_LIMIT - elapsed);
     setLocalTimeRemaining(remaining);
 
     timerRef.current = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - gameState.turnStartTime!) / 1000);
+      // Safety check to prevent NaN if turnStartRef is invalid
+      if (!turnStartRef.current || isNaN(turnStartRef.current)) {
+        clearInterval(timerRef.current!);
+        timerRef.current = null;
+        return;
+      }
+      
+      const elapsed = Math.floor((Date.now() - turnStartRef.current) / 1000);
       const remaining = Math.max(0, TURN_TIME_LIMIT - elapsed);
 
       setLocalTimeRemaining(remaining);
@@ -101,7 +117,7 @@ function ReplacleMultiplayerInner() {
         timerRef.current = null;
       }
     };
-  }, [gameState?.status, gameState?.turnStartTime]);
+  }, [gameState?.status]);
 
   // Load dictionary
   useEffect(() => {
@@ -276,10 +292,10 @@ function ReplacleMultiplayerInner() {
         <Typography variant="h3" sx={{ m: 0, color: "inherit" }}>
           {isMyTurn ? "Your Turn" : `Player ${gameState.currentPlayer}'s Turn`}
         </Typography>
-        {/* Timer visible when both players have joined (game is playing) and gameState is active */}
-        {gameState?.status === "playing" && localTimeRemaining > 0 && (
+        {/* Timer visible when both players have joined (game is playing) and timer is active */}
+        {gameState?.status === "playing" && localTimeRemaining > 0 && !isNaN(localTimeRemaining) && (
           <Typography variant="h3" sx={{ m: 0, color: "inherit", fontWeight: 700 }}>
-            {localTimeRemaining}s
+            {Math.max(0, Math.floor(localTimeRemaining))}s
           </Typography>
         )}
       </Paper>
