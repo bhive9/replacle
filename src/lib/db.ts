@@ -26,8 +26,10 @@ export interface RoomRecord {
   winner: 1 | 2 | null;
   player1Token: string;
   player2Token: string | null;
+  timer: number | null; // Seconds remaining
   lastUpdated: number;
 }
+
 
 export const dbStore = {
   getRoom(roomId: string): RoomRecord | null {

@@ -69,6 +69,9 @@ export async function POST(req: NextRequest) {
     if (isOver) {
       room.status = "game_over";
       room.winner = room.currentPlayer === 1 ? 2 : 1; // Last player who moved wins
+    } else {
+      // Start 30-second timer for the next player
+      room.timer = 30;
     }
     room.lastUpdated = Date.now();
 
