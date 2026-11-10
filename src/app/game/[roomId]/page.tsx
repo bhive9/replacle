@@ -257,7 +257,7 @@ function ReplacleMultiplayerInner() {
         </IconButton>
       </Box>
 
-      {/* Player Turn Indicator */}
+      {/* Player Turn Indicator + Timer */}
       <Paper
         elevation={0}
         sx={{
@@ -265,12 +265,21 @@ function ReplacleMultiplayerInner() {
           bgcolor: isMyTurn ? "primary.main" : "secondary.main",
           color: "white",
           transition: "all 0.3s ease",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           px: 3,
         }}
       >
         <Typography variant="h3" sx={{ m: 0, color: "inherit" }}>
           {isMyTurn ? "Your Turn" : `Player ${gameState.currentPlayer}'s Turn`}
         </Typography>
+        {/* Timer visible when both players have joined (game is playing) */}
+        {gameState.status === "playing" && (
+          <Typography variant="h3" sx={{ m: 0, color: "inherit", fontWeight: 700 }}>
+            {gameState.timeRemaining}s
+          </Typography>
+        )}
       </Paper>
 
       {/* Current Word Display */}
