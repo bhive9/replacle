@@ -200,22 +200,11 @@ export default function ReplacleGame() {
           The 2-player word replacement game. Change one letter, make a word, don't repeat.
         </Typography>
         <Button 
-        <Button 
           variant="contained"
           size="large" 
           onClick={startGame}
           disabled={startingWords.length === 0}
-          sx={{
-            bgcolor: "secondary.main",
-            color: "white",
-            "&:hover:not(:disabled)": {
-              bgcolor: "secondary.main",
-            },
-            "&:disabled": {
-              bgcolor: "grey.100",
-              color: "grey.500",
-            },
-          }}
+          color="secondary"
         >
           {startingWords.length === 0 ? "Loading Dictionary..." : "Start Game"}
         </Button>
