@@ -120,20 +120,10 @@ export default function ReplacleGame() {
           Total words played: {gameState.history.length}
         </Typography>
         <Button 
-          variant="contained" 
+          variant="outlined"
           size="large" 
           onClick={startGame}
           startIcon={<RefreshIcon />}
-          sx={{
-            bgcolor: "white",
-            color: "primary.main",
-            border: "2px solid",
-            borderColor: "primary.main",
-            "&:hover": {
-              bgcolor: "primary.main",
-              color: "white",
-            },
-          }}
         >
           Play Again
         </Button>
@@ -151,25 +141,10 @@ export default function ReplacleGame() {
           The 2-player word replacement game. Change one letter, make a word, don't repeat.
         </Typography>
         <Button 
-          variant="contained" 
+          variant="outlined"
           size="large" 
           onClick={startGame}
           disabled={startingWords.length === 0}
-          sx={{
-            bgcolor: "white",
-            color: "primary.main",
-            border: "2px solid",
-            borderColor: "primary.main",
-            "&:hover:not(:disabled)": {
-              bgcolor: "primary.main",
-              color: "white",
-            },
-            "&:disabled": {
-              bgcolor: "grey.100",
-              color: "grey.500",
-              borderColor: "grey.300",
-            },
-          }}
         >
           {startingWords.length === 0 ? "Loading Dictionary..." : "Start Game"}
         </Button>
