@@ -213,7 +213,7 @@ export default function ReplacleGame() {
             variant="outlined"
             size="large"
             href="/game/create"
-            color="primary"
+            color="secondary"
           >
             Create Multiplayer Room
           </Button>
