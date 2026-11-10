@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   Container,
   Typography,
@@ -28,6 +29,7 @@ export default function ReplacleGame() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const turnStartRef = useRef<number | null>(null);
+  const router = useRouter();
 
   // Timer countdown effect
   useEffect(() => {
@@ -109,6 +111,18 @@ export default function ReplacleGame() {
     setInput("");
     turnStartRef.current = now;
   }, [startingWords]);
+
+  const handleCreate = useCallback(async () => {
+    try {
+      const res = await fetch("/api/v1/game", { method: "POST" });
+      const data = await res.json();
+      if (res.ok && data.roomId) {
+        router.push(`/game/join/${data.roomId}`);
+      }
+    } catch (err) {
+      console.error("Failed to create room", err);
+    }
+  }, [router]);
 
   const handleMove = () => {
     const word = input.trim().toLowerCase();
