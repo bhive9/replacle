@@ -205,7 +205,17 @@ export default function ReplacleGame() {
           size="large" 
           onClick={startGame}
           disabled={startingWords.length === 0}
-          color="secondary"
+          sx={{
+            bgcolor: "#263D5B",
+            color: "white",
+            "&:hover:not(:disabled)": {
+              bgcolor: "#1a2e4a",
+            },
+            "&:disabled": {
+              bgcolor: "#5a6478",
+              color: "#ffffff80",
+            },
+          }}
         >
           {startingWords.length === 0 ? "Loading Dictionary..." : "Start Game"}
         </Button>
@@ -214,7 +224,13 @@ export default function ReplacleGame() {
             variant="contained"
             size="large"
             href="/game/create"
-            color="secondary"
+            sx={{
+              bgcolor: "#263D5B",
+              color: "white",
+              "&:hover": {
+                bgcolor: "#1a2e4a",
+              },
+            }}
           >
             Create Room
           </Button>
