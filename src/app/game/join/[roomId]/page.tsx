@@ -80,6 +80,7 @@ function JoinRoomContent() {
           onChange={(e) => setPlayerName(e.target.value)}
           margin="normal"
           sx={{ mb: 3 }}
+          color="secondary"
         />
 
         <Button 
