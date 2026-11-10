@@ -200,7 +200,7 @@ export default function ReplacleGame() {
           The 2-player word replacement game. Change one letter, make a word, don't repeat.
         </Typography>
         <Button 
-          variant="outlined"
+          variant="contained"
           size="large" 
           onClick={startGame}
           disabled={startingWords.length === 0}

@@ -52,9 +52,6 @@ export const doodleTheme = createTheme({
           boxShadow: tokens.shadow,
           "&:hover": { boxShadow: tokens.shadowHover },
         },
-        contained: {
-          background: `linear-gradient(135deg, ${tokens.primary} 0%, #3A8FD4 100%)`,
-        },
       },
     },
     MuiCard: {
