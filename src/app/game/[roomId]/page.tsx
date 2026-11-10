@@ -57,25 +57,26 @@ function ReplacleMultiplayerInner() {
 
   // Timer countdown effect
   useEffect(() => {
+    // Clean up any existing interval
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
+    // Only start timer when game is in playing state and has turnStartTime
     if (gameState?.status !== "playing" || gameState?.turnStartTime === null) {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
       return;
     }
 
-    const updateTimer = () => {
-      const elapsed = Math.floor((Date.now() - (gameState.turnStartTime ?? Date.now())) / 1000);
+    timerRef.current = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - gameState.turnStartTime!) / 1000);
       const remaining = Math.max(0, TURN_TIME_LIMIT - elapsed);
 
       setGameState(s => {
         if (!s || s.status !== "playing") return s;
         if (remaining <= 0) {
-          if (timerRef.current) {
-            clearInterval(timerRef.current);
-            timerRef.current = null;
-          }
+          clearInterval(timerRef.current!);
+          timerRef.current = null;
           return {
             ...s,
             status: "game_over",
@@ -85,10 +86,12 @@ function ReplacleMultiplayerInner() {
         }
         return { ...s, timeRemaining: remaining };
       });
-    };
+    }, 1000);
 
-    updateTimer();
-    timerRef.current = setInterval(updateTimer, 1000);
+    // Initial run
+    const elapsed = Math.floor((Date.now() - gameState.turnStartTime!) / 1000);
+    const remaining = Math.max(0, TURN_TIME_LIMIT - elapsed);
+    setGameState(s => (!s || s.status !== "playing") ? s : { ...s, timeRemaining: remaining });
 
     return () => {
       if (timerRef.current) {
