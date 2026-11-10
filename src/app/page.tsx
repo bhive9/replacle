@@ -124,6 +124,14 @@ export default function ReplacleGame() {
           size="large" 
           onClick={startGame}
           startIcon={<RefreshIcon />}
+          sx={{
+            bgcolor: "linear-gradient(135deg, #263D5B 0%, #1a2e4a 100%)",
+            "&:hover": {
+              bgcolor: "linear-gradient(135deg, #1a2e4a 0%, #263D5B 100%)",
+              boxShadow: "0 8px 22px rgba(38, 61, 91, 0.28)",
+            },
+            boxShadow: "0 4px 14px rgba(38, 61, 91, 0.18)",
+          }}
         >
           Play Again
         </Button>
@@ -145,6 +153,14 @@ export default function ReplacleGame() {
           size="large" 
           onClick={startGame}
           disabled={startingWords.length === 0}
+          sx={{
+            bgcolor: "linear-gradient(135deg, #263D5B 0%, #1a2e4a 100%)",
+            "&:hover:not(:disabled)": {
+              bgcolor: "linear-gradient(135deg, #1a2e4a 0%, #263D5B 100%)",
+              boxShadow: "0 8px 22px rgba(38, 61, 91, 0.28)",
+            },
+            boxShadow: "0 4px 14px rgba(38, 61, 91, 0.18)",
+          }}
         >
           {startingWords.length === 0 ? "Loading Dictionary..." : "Start Game"}
         </Button>
