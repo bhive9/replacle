@@ -210,16 +210,10 @@ export default function ReplacleGame() {
         </Button>
         <Box sx={{ mt: 2 }}>
           <Button 
-            variant="contained"
-            size="large"
-            href="/game/create"
-            sx={{
-              bgcolor: "secondary.main",
-              color: "white",
-              "&:hover": {
-                bgcolor: "secondary.main",
-              },
-            }}
+            variant="contained" 
+            size="large" 
+            onClick={handleCreate}
+            fullWidth
           >
             Create Room
           </Button>
