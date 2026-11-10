@@ -124,6 +124,7 @@ export default function ReplacleGame() {
           size="large" 
           onClick={startGame}
           startIcon={<RefreshIcon />}
+          color="secondary"
         >
           Play Again
         </Button>
@@ -145,6 +146,7 @@ export default function ReplacleGame() {
           size="large" 
           onClick={startGame}
           disabled={startingWords.length === 0}
+          color="secondary"
         >
           {startingWords.length === 0 ? "Loading Dictionary..." : "Start Game"}
         </Button>
