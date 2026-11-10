@@ -200,25 +200,8 @@ function ReplacleMultiplayerInner() {
     );
   }
 
-  // Setup state - waiting for opponent
-  if (!gameState || gameState.status === "setup") {
-    return (
-      <Container maxWidth="sm" sx={{ py: 10, textAlign: "center" }}>
-        <Typography variant="h3" color="secondary" gutterBottom>
-          Waiting for Opponent...
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 4 }}>
-          Room ID: {roomId}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Game will start automatically when the second player joins.
-        </Typography>
-      </Container>
-    );
-  }
-
   // Game over state
-  if (gameState.status === "game_over") {
+  if (gameState?.status === "game_over") {
     const isTimeout = gameState.timeRemaining === 0;
     return (
       <Container maxWidth="sm" sx={{ py: 10, textAlign: "center" }}>
@@ -245,6 +228,15 @@ function ReplacleMultiplayerInner() {
         >
           Play Again
         </Button>
+      </Container>
+    );
+  }
+
+  // If game not loaded yet, show loading
+  if (!gameState) {
+    return (
+      <Container maxWidth="sm" sx={{ py: 10, textAlign: "center" }}>
+        <Typography variant="h3" color="secondary">Loading...</Typography>
       </Container>
     );
   }
