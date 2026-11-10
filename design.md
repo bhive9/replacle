@@ -21,8 +21,8 @@ A creative, playful, and informal style that uses doodles, sketches, handwritten
 | shadow-hover | `0 8px 22px rgba(38,61,91,0.28)` | hover elevation |
 
 **Typography scale:** 14 / 16 / 18 / 24 / 32 / 40
-- primary font: **Delius Swash Caps** (handwritten display)
-- mono font: **JetBrains Mono**
+- primary font: **Montserrat** (loaded via `next/font/google` in `src/app/layout.tsx`)
+- mono font: **JetBrains Mono** (loaded via `next/font/google` in `src/app/layout.tsx`)
 - weights: 100–900
 
 **Spacing scale:** 4 / 8 / 12 / 16 / 24 / 32 (multiples of 4)

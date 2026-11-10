@@ -29,10 +29,10 @@ export const doodleTheme = createTheme({
   },
   typography: {
     fontFamily: [
-      '"Delius Swash Caps"',
-      "system-ui",
-      "sans-serif",
-    ].join(","),
+      'Montserrat',
+      'system-ui',
+      'sans-serif',
+    ].join(','),
     h1: { fontWeight: 700, fontSize: "2.5rem", lineHeight: 1.15 },
     h2: { fontWeight: 700, fontSize: "2rem", lineHeight: 1.2 },
     h3: { fontWeight: 600, fontSize: "1.5rem", lineHeight: 1.25 },
