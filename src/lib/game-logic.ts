@@ -12,6 +12,7 @@ export function isOneLetterDifferent(word1: string, word2: string): boolean {
 export type GameStatus = "setup" | "playing" | "game_over";
 
 export interface GameState {
+  id?: string;
   history: string[];
   currentPlayer: 1 | 2;
   status: GameStatus;
