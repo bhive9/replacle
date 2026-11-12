@@ -25,7 +25,7 @@ async function kvSet(key: string, value: string): Promise<void> {
 
 export interface RemoteGame {
   id: string;
-  player1Name: string;
+  player1Name: string | null;
   player2Name: string | null;
   player1Ready: boolean;
   player2Ready: boolean;
@@ -39,12 +39,12 @@ export interface RemoteGame {
   createdAt: number;
 }
 
-export async function createRemoteGame(player1Name: string): Promise<RemoteGame> {
+export async function createRemoteGame(): Promise<RemoteGame> {
   const id = Math.random().toString(36).substring(2, 8);
   const now = Date.now();
   const game: RemoteGame = {
     id,
-    player1Name,
+    player1Name: null,
     player2Name: null,
     player1Ready: false,
     player2Ready: false,

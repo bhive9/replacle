@@ -1,37 +1,42 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import {
   Container,
   Typography,
   Button,
   Box,
   TextField,
-  InputAdornment,
-  IconButton,
   Paper,
-  OutlinedInput,
-} from "@mui/material";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+} from "@mui/material"
 
 export default function RemoteHub() {
-  const router = useRouter();
-  const [name, setName] = useState("");
-  const [roomId, setRoomId] = useState("");
+  const router = useRouter()
+  const [roomId, setRoomId] = useState("")
 
   const handleCreate = () => {
-    if (!name.trim()) return;
-    router.push(`/game/remote/create?name=${encodeURIComponent(name.trim())}`);
-  };
+    fetch("/api/remote/game", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ player1Name: "Player 1" }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to create game")
+        return res.json()
+      })
+      .then(({ gameId }) => {
+        router.push(`/game/remote/join/${gameId}?player=1`)
+      })
+      .catch(() => {
+        router.push("/game/remote")
+      })
+  }
 
   const handleJoin = () => {
-    if (!roomId.trim()) return;
-    const path = name.trim()
-      ? `/game/remote/join/${roomId.trim().toLowerCase()}?name=${encodeURIComponent(name.trim())}`
-      : `/game/remote/join/${roomId.trim().toLowerCase()}`;
-    router.push(path);
-  };
+    if (!roomId.trim()) return
+    router.push(`/game/remote/join/${roomId.trim().toLowerCase()}?player=2`)
+  }
 
   return (
     <Container maxWidth="sm" sx={{ py: 6 }}>
@@ -43,28 +48,16 @@ export default function RemoteHub() {
       </Typography>
 
       <Paper elevation={0} sx={{ p: 4, border: 1, borderColor: "divider" }}>
-        <TextField
-          label="Your Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Enter your name"
+        <Button
+          variant="contained"
+          size="large"
+          color="secondary"
+          onClick={handleCreate}
           fullWidth
-          sx={{ mb: 4 }}
-        />
-
-        <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
-          <Button
-            variant="contained"
-            size="large"
-            color="secondary"
-            onClick={handleCreate}
-            disabled={!name.trim()}
-            fullWidth
-            sx={{ py: 1.5, height: "auto" }}
-          >
-            Create Room
-          </Button>
-        </Box>
+          sx={{ py: 1.5, height: "auto", mb: 3 }}
+        >
+          Create Room
+        </Button>
 
         <Typography variant="body2" color="text.secondary" align="center" sx={{ my: 3 }}>
           OR JOIN AN EXISTING ROOM
@@ -77,20 +70,17 @@ export default function RemoteHub() {
             onChange={(e) => setRoomId(e.target.value.toLowerCase())}
             placeholder="Enter Room ID"
             fullWidth
-            sx={{ mb: 2, textAlign: "center", py: 1.5 }}
-            inputProps={{ maxLength: 8 }}
           />
           <Button
-            variant="outlined"
+            variant="contained"
             size="large"
             onClick={handleJoin}
             disabled={!roomId.trim()}
-            sx={{ py: 1.5, height: "auto" }}
           >
             Join
           </Button>
         </Box>
       </Paper>
     </Container>
-  );
+  )
 }
