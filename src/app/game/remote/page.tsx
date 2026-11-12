@@ -70,12 +70,14 @@ export default function RemoteHub() {
           OR JOIN AN EXISTING ROOM
         </Typography>
 
-        <Box sx={{ display: "flex", gap: 2 }}>
-          <OutlinedInput
-            placeholder="Enter Room ID"
+        <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
+          <TextField
+            label="Room ID"
             value={roomId}
             onChange={(e) => setRoomId(e.target.value.toLowerCase())}
-            sx={{ flex: 1, py: 1.5, borderRadius: 1, border: 1, borderColor: "divider" }}
+            placeholder="Enter Room ID"
+            fullWidth
+            sx={{ mb: 2 }}
             inputProps={{ maxLength: 8, style: { textAlign: "center" } }}
           />
           <Button
@@ -83,7 +85,7 @@ export default function RemoteHub() {
             size="large"
             onClick={handleJoin}
             disabled={!roomId.trim()}
-            sx={{ py: 1.5, height: "auto", minWidth: "auto" }}
+            sx={{ py: 1.5, height: "auto" }}
           >
             Join Room
           </Button>
