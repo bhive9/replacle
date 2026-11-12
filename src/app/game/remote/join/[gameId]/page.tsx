@@ -149,8 +149,7 @@ function RemoteJoinPageInner() {
           color="secondary"
           onClick={handleSetName}
           disabled={!playerName.trim() || !!(game.player1Name && game.player2Name)}
-          fullWidth
-          sx={{ mb: 3, height: 56 }}
+          sx={{ py: 1.5, height: "auto", width: "100%" }}
         >
           Set Name
         </Button>
@@ -233,7 +232,7 @@ function RemoteJoinPageInner() {
                   value={playerName}
                   onChange={(e) => setPlayerNameState(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSetName()}
-                  sx={{ flex: 1, minWidth: 200 }}
+                  sx={{ flex: 1, py: 0.5 }}
                 />
                 <Button
                   variant="contained"
@@ -241,6 +240,7 @@ function RemoteJoinPageInner() {
                   color="secondary"
                   onClick={handleSetName}
                   disabled={!playerName.trim()}
+                  sx={{ py: 0.5, height: "auto" }}
                 >
                   Join
                 </Button>

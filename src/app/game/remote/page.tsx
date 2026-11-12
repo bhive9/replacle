@@ -60,7 +60,7 @@ export default function RemoteHub() {
             onClick={handleCreate}
             disabled={!name.trim()}
             fullWidth
-            sx={{ height: 56 }}
+            sx={{ py: 1.5, height: "auto" }}
           >
             Create Room
           </Button>
@@ -75,7 +75,7 @@ export default function RemoteHub() {
             placeholder="Enter Room ID"
             value={roomId}
             onChange={(e) => setRoomId(e.target.value.toLowerCase())}
-            sx={{ flex: 1 }}
+            sx={{ flex: 1, py: 1.5, borderRadius: 1, border: 1, borderColor: "divider" }}
             inputProps={{ maxLength: 8, style: { textAlign: "center" } }}
           />
           <Button
@@ -83,7 +83,7 @@ export default function RemoteHub() {
             size="large"
             onClick={handleJoin}
             disabled={!roomId.trim()}
-            sx={{ minWidth: 140, height: 56 }}
+            sx={{ py: 1.5, height: "auto", minWidth: "auto" }}
           >
             Join Room
           </Button>
