@@ -77,8 +77,8 @@ export default function RemoteHub() {
             onChange={(e) => setRoomId(e.target.value.toLowerCase())}
             placeholder="Enter Room ID"
             fullWidth
-            sx={{ mb: 2 }}
-            inputProps={{ maxLength: 8, style: { textAlign: "center" } }}
+            sx={{ mb: 2, textAlign: "center" }}
+            inputProps={{ maxLength: 8 }}
           />
           <Button
             variant="outlined"
