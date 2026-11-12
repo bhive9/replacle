@@ -27,7 +27,10 @@ export default function RemoteHub() {
 
   const handleJoin = () => {
     if (!roomId.trim()) return;
-    router.push(`/game/remote/join/${roomId.trim().toLowerCase()}`);
+    const path = name.trim()
+      ? `/game/remote/join/${roomId.trim().toLowerCase()}?name=${encodeURIComponent(name.trim())}`
+      : `/game/remote/join/${roomId.trim().toLowerCase()}`;
+    router.push(path);
   };
 
   return (
@@ -40,44 +43,38 @@ export default function RemoteHub() {
       </Typography>
 
       <Paper elevation={0} sx={{ p: 4, border: 1, borderColor: "divider" }}>
-        <Typography variant="h3" gutterBottom align="center" sx={{ mb: 3 }}>
-          Create Room
-        </Typography>
-        <Box sx={{ display: "flex", gap: 2, mb: 4 }}>
-          <TextField
-            label="Your Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Enter your name"
-            sx={{ flex: 1 }}
-          />
+        <TextField
+          label="Your Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter your name"
+          fullWidth
+          sx={{ mb: 4 }}
+        />
+
+        <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
           <Button
             variant="contained"
             size="large"
             color="secondary"
             onClick={handleCreate}
             disabled={!name.trim()}
-            sx={{ minWidth: 160, height: 56 }}
+            fullWidth
+            sx={{ height: 56 }}
           >
             Create Room
           </Button>
         </Box>
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, my: 3 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: "nowrap" }}>
-            or
-          </Typography>
-        </Box>
-
-        <Typography variant="h3" gutterBottom align="center" sx={{ mb: 3 }}>
-          Join Room
+        <Typography variant="body2" color="text.secondary" align="center" sx={{ my: 3 }}>
+          OR JOIN AN EXISTING ROOM
         </Typography>
+
         <Box sx={{ display: "flex", gap: 2 }}>
           <OutlinedInput
-            label="Room ID"
+            placeholder="Enter Room ID"
             value={roomId}
             onChange={(e) => setRoomId(e.target.value.toLowerCase())}
-            placeholder="e.g. abc123"
             sx={{ flex: 1 }}
             inputProps={{ maxLength: 8, style: { textAlign: "center" } }}
           />
@@ -86,7 +83,7 @@ export default function RemoteHub() {
             size="large"
             onClick={handleJoin}
             disabled={!roomId.trim()}
-            sx={{ minWidth: 160, height: 56 }}
+            sx={{ minWidth: 140, height: 56 }}
           >
             Join Room
           </Button>

@@ -134,9 +134,26 @@ function RemoteJoinPageInner() {
       </Typography>
 
       <Paper elevation={0} sx={{ p: 3, border: 1, borderColor: "divider", mb: 3 }}>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
-          Share this link with your friend:
-        </Typography>
+        <TextField
+          label="Your Name"
+          value={playerName}
+          onChange={(e) => setPlayerNameState(e.target.value)}
+          placeholder="Enter your name"
+          fullWidth
+          sx={{ mb: 3 }}
+          disabled={!!(game.player1Name && game.player2Name)}
+        />
+        <Button
+          variant="contained"
+          size="large"
+          color="secondary"
+          onClick={handleSetName}
+          disabled={!playerName.trim() || !!(game.player1Name && game.player2Name)}
+          fullWidth
+          sx={{ mb: 3, height: 56 }}
+        >
+          Set Name
+        </Button>
         <Box sx={{ display: "flex", gap: 2 }}>
           <Box component="input" type="text" readOnly value={shareUrl} sx={{ flex: 1, p: 1.5, textAlign: "center", border: 1, borderColor: "divider", borderRadius: 1, fontFamily: "monospace" }} />
           <Button
