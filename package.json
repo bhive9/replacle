@@ -13,6 +13,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^9.5.0",
     "@mui/material": "^9.5.0",
+    "@upstash/redis": "^1.41.0",
     "better-sqlite3": "^13.0.3",
     "next": "16.4.5",
     "react": "19.3.0",
