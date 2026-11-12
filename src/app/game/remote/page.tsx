@@ -87,7 +87,7 @@ export default function RemoteHub() {
             disabled={!roomId.trim()}
             sx={{ py: 1.5, height: "auto" }}
           >
-            Join Room
+            Join
           </Button>
         </Box>
       </Paper>
