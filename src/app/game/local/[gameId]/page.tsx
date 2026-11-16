@@ -77,6 +77,8 @@ function LocalGameInner() {
           setGameState(data.game);
         } else if (res.status === 404) {
           router.push("/");
+        } else {
+          console.error("Failed to load game:", await res.text());
         }
       } catch (err) {
         console.error("Failed to load game", err);
