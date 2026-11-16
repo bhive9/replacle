@@ -17,8 +17,18 @@ export default function HomePage() {
         onClick={() => router.push("/game/local/join")}
         color="secondary"
         fullWidth
+        sx={{ mb: 2 }}
       >
         Pass and Play
+      </Button>
+      <Button
+        variant="outlined"
+        size="large"
+        onClick={() => router.push("/game/remote")}
+        color="secondary"
+        fullWidth
+      >
+        Play Remote
       </Button>
     </Container>
   );
