@@ -9,10 +9,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "player1Name and player2Name required" }, { status: 400 });
     }
 
-    const game = createLocalGame(player1Name, player2Name);
+    const game = await createLocalGame(player1Name, player2Name);
 
     return NextResponse.json({ gameId: game.id });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to start game" }, { status: 500 });
+  } catch (err: unknown) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Failed to start game" },
+      { status: 500 }
+    );
   }
 }

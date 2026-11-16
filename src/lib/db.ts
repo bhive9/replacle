@@ -1,11 +1,7 @@
-import Database from "better-sqlite3";
-import path from "path";
-import { fileURLToPath } from "url";
+import { Redis } from "@upstash/redis";
 import { generateGameId } from "@/lib/utils";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-interface LocalGameState {
+export interface LocalGameState {
   id: string;
   player1Name: string;
   player2Name: string;
@@ -20,28 +16,48 @@ interface LocalGameState {
   updatedAt: number;
 }
 
-const DB_PATH = path.join(__dirname, "../../game.db");
-const db = new Database(DB_PATH);
+const GAME_KEY = (id: string) => `game:local:${id}`;
 
-// Initialize tables
-db.exec(`
-  CREATE TABLE IF NOT EXISTS local_games (
-    id TEXT PRIMARY KEY,
-    player1_name TEXT NOT NULL,
-    player2_name TEXT NOT NULL,
-    history TEXT NOT NULL DEFAULT '[]',
-    current_player INTEGER NOT NULL DEFAULT 1,
-    status TEXT NOT NULL DEFAULT 'setup',
-    winner INTEGER,
-    error TEXT,
-    turn_start_time INTEGER,
-    time_remaining INTEGER NOT NULL DEFAULT 30,
-    created_at INTEGER NOT NULL,
-    updated_at INTEGER NOT NULL
-  )
-`);
+// In-memory fallback for local development when Redis env vars are not configured.
+const memoryStore = new Map<string, string>();
 
-export function createLocalGame(player1Name: string, player2Name: string): LocalGameState {
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN,
+});
+
+const useRedis = !!(
+  process.env.KV_REST_API_URL ||
+  process.env.UPSTASH_REDIS_REST_URL ||
+  process.env.KV_REST_API_TOKEN ||
+  process.env.UPSTASH_REDIS_REST_TOKEN
+);
+
+async function readRaw(id: string): Promise<string | null> {
+  if (useRedis) return (await redis.get<string>(GAME_KEY(id))) ?? null;
+  return memoryStore.get(GAME_KEY(id)) ?? null;
+}
+
+async function writeRaw(id: string, value: string): Promise<void> {
+  if (useRedis) {
+    await redis.set(GAME_KEY(id), value);
+    return;
+  }
+  memoryStore.set(GAME_KEY(id), value);
+}
+
+async function deleteRaw(id: string): Promise<void> {
+  if (useRedis) {
+    await redis.del(GAME_KEY(id));
+    return;
+  }
+  memoryStore.delete(GAME_KEY(id));
+}
+
+export async function createLocalGame(
+  player1Name: string,
+  player2Name: string
+): Promise<LocalGameState> {
   const id = generateGameId();
   const now = Date.now();
   const state: LocalGameState = {
@@ -58,67 +74,20 @@ export function createLocalGame(player1Name: string, player2Name: string): Local
     createdAt: now,
     updatedAt: now,
   };
-  
-  db.prepare(`
-    INSERT INTO local_games (id, player1_name, player2_name, history, current_player, status, winner, error, turn_start_time, time_remaining, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
-    state.id,
-    state.player1Name,
-    state.player2Name,
-    JSON.stringify(state.history),
-    state.currentPlayer,
-    state.status,
-    state.winner,
-    state.error,
-    state.turnStartTime,
-    state.timeRemaining,
-    state.createdAt,
-    state.updatedAt
-  );
-  
+  await writeRaw(id, JSON.stringify(state));
   return state;
 }
 
-export function getLocalGame(id: string): LocalGameState | null {
-  const row = db.prepare("SELECT * FROM local_games WHERE id = ?").get(id) as any;
-  if (!row) return null;
-  
-  return {
-    id: row.id,
-    player1Name: row.player1_name,
-    player2Name: row.player2_name,
-    history: JSON.parse(row.history),
-    currentPlayer: row.current_player,
-    status: row.status,
-    winner: row.winner,
-    error: row.error,
-    turnStartTime: row.turn_start_time,
-    timeRemaining: row.time_remaining,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
+export async function getLocalGame(id: string): Promise<LocalGameState | null> {
+  const raw = await readRaw(id);
+  return raw ? (JSON.parse(raw) as LocalGameState) : null;
 }
 
-export function saveLocalGame(state: LocalGameState): void {
+export async function saveLocalGame(state: LocalGameState): Promise<void> {
   state.updatedAt = Date.now();
-  db.prepare(`
-    UPDATE local_games
-    SET history = ?, current_player = ?, status = ?, winner = ?, error = ?, turn_start_time = ?, time_remaining = ?, updated_at = ?
-    WHERE id = ?
-  `).run(
-    JSON.stringify(state.history),
-    state.currentPlayer,
-    state.status,
-    state.winner,
-    state.error,
-    state.turnStartTime,
-    state.timeRemaining,
-    state.updatedAt,
-    state.id
-  );
+  await writeRaw(state.id, JSON.stringify(state));
 }
 
-export function deleteLocalGame(id: string): void {
-  db.prepare("DELETE FROM local_games WHERE id = ?").run(id);
+export async function deleteLocalGame(id: string): Promise<void> {
+  await deleteRaw(id);
 }

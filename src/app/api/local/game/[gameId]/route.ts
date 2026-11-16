@@ -7,15 +7,18 @@ export async function GET(
 ) {
   try {
     const { gameId } = await params;
-    const game = getLocalGame(gameId);
-    
+    const game = await getLocalGame(gameId);
+
     if (!game) {
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
-    
+
     return NextResponse.json({ game });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to load game" }, { status: 500 });
+  } catch (err: unknown) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Failed to load game" },
+      { status: 500 }
+    );
   }
 }
 
@@ -24,13 +27,16 @@ export async function PUT(
   { params }: { params: Promise<{ gameId: string }> }
 ) {
   try {
-    const { gameId } = await params;
+    await params;
     const gameState = await req.json();
-    
-    saveLocalGame(gameState);
-    
+
+    await saveLocalGame(gameState);
+
     return NextResponse.json({ success: true });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to save game" }, { status: 500 });
+  } catch (err: unknown) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Failed to save game" },
+      { status: 500 }
+    );
   }
 }
