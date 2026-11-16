@@ -19,7 +19,7 @@ import HistoryIcon from "@mui/icons-material/History";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { isOneLetterDifferent, checkGameOver, TURN_TIME_LIMIT } from "@/lib/game-logic";
 
-import { GameState, StateMachine } from "@/lib/game-state";
+import { GameState } from "@/lib/game-state";
 
 
 function LocalGameInner() {
@@ -56,6 +56,43 @@ function LocalGameInner() {
     loadData();
   }, []);
 
+  // Save game state to API
+  const saveGameState = useCallback(async (newState: GameState) => {
+    if (!gameId) return;
+    try {
+      await fetch(`/api/local/game/${gameId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newState),
+      });
+    } catch (err) {
+      console.error("Failed to save game", err);
+    }
+  }, [gameId]);
+
+  const startNewGame = useCallback(() => {
+    if (!gameState || startingWords.length === 0) return;
+    
+    const randomWord = startingWords[Math.floor(Math.random() * startingWords.length)];
+    const now = Date.now();
+    
+    const newState: GameState = {
+      ...gameState,
+      history: [randomWord],
+      currentPlayer: 1,
+      status: "playing",
+      winner: null,
+      error: null,
+      turnStartTime: now,
+      timeRemaining: TURN_TIME_LIMIT,
+    };
+    
+    setGameState(newState);
+    setInput("");
+    turnStartRef.current = now;
+    saveGameState(newState);
+  }, [gameState, startingWords, saveGameState]);
+
   // Load game state
   useEffect(() => {
     async function loadGame() {
@@ -88,8 +125,9 @@ function LocalGameInner() {
     if (startingWords.length === 0) return;
 
     startedRef.current = true;
+    // eslint-disable-next-line
     startNewGame();
-  }, [gameState?.status, startingWords.length]);
+  }, [gameState?.status, startingWords.length, gameState, startNewGame]);
 
   // Timer countdown effect
   useEffect(() => {
@@ -137,44 +175,7 @@ function LocalGameInner() {
         timerRef.current = null;
       }
     };
-  }, [gameState?.status, gameState?.turnStartTime]);
-
-  // Save game state to API
-  const saveGameState = useCallback(async (newState: GameState) => {
-    if (!gameId) return;
-    try {
-      await fetch(`/api/local/game/${gameId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newState),
-      });
-    } catch (err) {
-      console.error("Failed to save game", err);
-    }
-  }, [gameId]);
-
-  const startNewGame = useCallback(() => {
-    if (!gameState || startingWords.length === 0) return;
-    
-    const randomWord = startingWords[Math.floor(Math.random() * startingWords.length)];
-    const now = Date.now();
-    
-    const newState: GameState = {
-      ...gameState,
-      history: [randomWord],
-      currentPlayer: 1,
-      status: "playing",
-      winner: null,
-      error: null,
-      turnStartTime: now,
-      timeRemaining: TURN_TIME_LIMIT,
-    };
-    
-    setGameState(newState);
-    setInput("");
-    turnStartRef.current = now;
-    saveGameState(newState);
-  }, [gameState, startingWords, saveGameState]);
+  }, [gameState?.status, gameState?.turnStartTime, gameState]);
 
   const handleMove = useCallback(() => {
     if (!gameState || !input.trim()) return;
@@ -315,7 +316,7 @@ function LocalGameInner() {
         }}
       >
         <Typography variant="h3" sx={{ m: 0, color: "inherit" }}>
-          {currentPlayerName}'s Turn
+          {currentPlayerName}&apos;s Turn
         </Typography>
         <Typography variant="h3" sx={{ m: 0, color: "inherit", fontWeight: 700 }}>
           {gameState.timeRemaining}s
