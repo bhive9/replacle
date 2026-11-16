@@ -85,6 +85,7 @@ function LocalGameJoinInner() {
 
       if (res.ok) {
         const { gameId } = await res.json();
+        console.debug(`Game ${gameId} created`)
         router.push(`/game/local/${gameId}`);
       } else {
         console.error("Failed to start game");

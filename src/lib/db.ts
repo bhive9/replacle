@@ -1,20 +1,5 @@
 import { Redis } from "@upstash/redis";
-import { generateGameId } from "@/lib/utils";
-
-export interface LocalGameState {
-  id: string;
-  player1Name: string;
-  player2Name: string;
-  history: string[];
-  currentPlayer: 1 | 2;
-  status: "setup" | "playing" | "game_over";
-  winner: 1 | 2 | null;
-  error: string | null;
-  turnStartTime: number | null;
-  timeRemaining: number;
-  createdAt: number;
-  updatedAt: number;
-}
+import { GameState, generateGameId } from "@/lib/game-state";
 
 const GAME_KEY = (id: string) => `game:local:${id}`;
 
@@ -57,10 +42,10 @@ async function deleteRaw(id: string): Promise<void> {
 export async function createLocalGame(
   player1Name: string,
   player2Name: string
-): Promise<LocalGameState> {
+): Promise<GameState> {
   const id = generateGameId();
   const now = Date.now();
-  const state: LocalGameState = {
+  const state: GameState = {
     id,
     player1Name,
     player2Name,
@@ -78,12 +63,12 @@ export async function createLocalGame(
   return state;
 }
 
-export async function getLocalGame(id: string): Promise<LocalGameState | null> {
+export async function getLocalGame(id: string): Promise<GameState | null> {
   const raw = await readRaw(id);
-  return raw ? (JSON.parse(raw) as LocalGameState) : null;
+  return raw ? (JSON.parse(raw) as GameState) : null;
 }
 
-export async function saveLocalGame(state: LocalGameState): Promise<void> {
+export async function saveLocalGame(state: GameState): Promise<void> {
   state.updatedAt = Date.now();
   await writeRaw(state.id, JSON.stringify(state));
 }

@@ -19,24 +19,14 @@ import HistoryIcon from "@mui/icons-material/History";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { isOneLetterDifferent, checkGameOver, TURN_TIME_LIMIT } from "@/lib/game-logic";
 
-interface LocalGameState {
-  id: string;
-  player1Name: string;
-  player2Name: string;
-  history: string[];
-  currentPlayer: 1 | 2;
-  status: "setup" | "playing" | "game_over";
-  winner: 1 | 2 | null;
-  error: string | null;
-  turnStartTime: number | null;
-  timeRemaining: number;
-}
+import { GameState, StateMachine } from "@/lib/game-state";
+
 
 function LocalGameInner() {
   const { gameId } = useParams();
   const router = useRouter();
   
-  const [gameState, setGameState] = useState<LocalGameState | null>(null);
+  const [gameState, setGameState] = useState<GameState | null>(null);
   const [input, setInput] = useState("");
   const [dictionary, setDictionary] = useState<Set<string>>(new Set());
   const [startingWords, setStartingWords] = useState<string[]>([]);
@@ -78,7 +68,9 @@ function LocalGameInner() {
         } else if (res.status === 404) {
           router.push("/");
         } else {
-          console.error("Failed to load game:", await res.text());
+          const text = await res.text();
+          console.error("Failed to load game:", res.status, text);
+          throw new Error(`Failed to load game: ${res.status} ${text}`);
         }
       } catch (err) {
         console.error("Failed to load game", err);
@@ -148,7 +140,7 @@ function LocalGameInner() {
   }, [gameState?.status, gameState?.turnStartTime]);
 
   // Save game state to API
-  const saveGameState = useCallback(async (newState: LocalGameState) => {
+  const saveGameState = useCallback(async (newState: GameState) => {
     if (!gameId) return;
     try {
       await fetch(`/api/local/game/${gameId}`, {
@@ -167,7 +159,7 @@ function LocalGameInner() {
     const randomWord = startingWords[Math.floor(Math.random() * startingWords.length)];
     const now = Date.now();
     
-    const newState: LocalGameState = {
+    const newState: GameState = {
       ...gameState,
       history: [randomWord],
       currentPlayer: 1,
@@ -211,7 +203,7 @@ function LocalGameInner() {
     const gameOver = checkGameOver(word, dictionary, newHistory);
     const now = Date.now();
 
-    const newState: LocalGameState = {
+    const newState: GameState = {
       ...gameState,
       history: newHistory,
       currentPlayer: gameState.currentPlayer === 1 ? 2 : 1,

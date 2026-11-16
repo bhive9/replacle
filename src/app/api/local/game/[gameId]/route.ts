@@ -10,11 +10,15 @@ export async function GET(
     const game = await getLocalGame(gameId);
 
     if (!game) {
-      return NextResponse.json({ error: "Game not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Game not found" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({ game });
   } catch (err: unknown) {
+    console.error("getLocalGame error:", err);
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Failed to load game" },
       { status: 500 }
