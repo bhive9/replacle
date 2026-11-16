@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getLocalGame, saveLocalGame } from "@/lib/db";
-
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ gameId: string }> }
@@ -33,6 +32,13 @@ export async function PUT(
   try {
     await params;
     const gameState = await req.json();
+
+    if (typeof gameState?.id !== "string" || !gameState.id) {
+      return NextResponse.json(
+        { error: "Game state must include an id" },
+        { status: 400 }
+      );
+    }
 
     await saveLocalGame(gameState);
 

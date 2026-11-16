@@ -14,11 +14,13 @@ import {
 } from "@mui/material";
 
 function NameInput({
+  id,
   label,
   value,
   onChange,
   color,
 }: {
+  id: string;
   label: string;
   value: string;
   onChange: (v: string) => void;
@@ -37,6 +39,7 @@ function NameInput({
       }}
     >
       <InputLabel
+        htmlFor={id}
         sx={{
           "&.Mui-focused": {
             color: `${color}.main`,
@@ -46,6 +49,7 @@ function NameInput({
         {label}
       </InputLabel>
       <OutlinedInput
+        id={id}
         label={label}
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -113,12 +117,14 @@ function LocalGameJoinInner() {
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
           <NameInput
+            id="player1-name"
             label="Player 1 Name"
             value={player1Name}
             onChange={setPlayer1Name}
             color="primary"
           />
           <NameInput
+            id="player2-name"
             label="Player 2 Name"
             value={player2Name}
             onChange={setPlayer2Name}
