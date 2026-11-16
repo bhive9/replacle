@@ -14,8 +14,12 @@ import {
 export default function RemoteHub() {
   const router = useRouter()
   const [roomId, setRoomId] = useState("")
+  const [error, setError] = useState("")
+  const [creating, setCreating] = useState(false)
 
   const handleCreate = () => {
+    setCreating(true)
+    setError("")
     fetch("/api/remote/game", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -28,9 +32,10 @@ export default function RemoteHub() {
       .then(({ gameId }) => {
         router.push(`/game/remote/join/${gameId}?player=1`)
       })
-      .catch(() => {
-        router.push("/game/remote")
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : "Failed to create game")
       })
+      .finally(() => setCreating(false))
   }
 
   const handleJoin = () => {
@@ -48,11 +53,13 @@ export default function RemoteHub() {
       </Typography>
 
       <Paper elevation={0} sx={{ p: 4, border: 1, borderColor: "divider" }}>
+        {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>}
         <Button
           variant="contained"
           size="large"
           color="secondary"
           onClick={handleCreate}
+          disabled={creating}
           fullWidth
           sx={{ py: 1.5, height: "auto", mb: 3 }}
         >

@@ -129,6 +129,9 @@ function LocalGameInner() {
     startNewGame();
   }, [gameState?.status, startingWords.length, gameState, startNewGame]);
 
+  const gameStatus = gameState?.status;
+  const turnStartTime = gameState?.turnStartTime ?? null;
+
   // Timer countdown effect
   useEffect(() => {
     if (timerRef.current) {
@@ -136,20 +139,21 @@ function LocalGameInner() {
       timerRef.current = null;
     }
 
-    if (!gameState || gameState.status !== "playing" || !gameState.turnStartTime) {
+    if (gameStatus !== "playing" || !turnStartTime) {
       return;
     }
 
-    turnStartRef.current = gameState.turnStartTime;
+    turnStartRef.current = turnStartTime;
 
     const updateTimer = () => {
       if (!turnStartRef.current) return;
-      
+
       const elapsed = Math.floor((Date.now() - turnStartRef.current) / 1000);
       const remaining = Math.max(0, TURN_TIME_LIMIT - elapsed);
 
       setGameState(s => {
-        if (!s || s.status !== "playing") return s;
+        // Return the same state when nothing changed to avoid re-render loops.
+        if (!s || s.status !== "playing" || s.timeRemaining === remaining) return s;
         if (remaining <= 0) {
           if (timerRef.current) {
             clearInterval(timerRef.current);
@@ -166,7 +170,6 @@ function LocalGameInner() {
       });
     };
 
-    updateTimer();
     timerRef.current = setInterval(updateTimer, 1000);
 
     return () => {
@@ -175,7 +178,8 @@ function LocalGameInner() {
         timerRef.current = null;
       }
     };
-  }, [gameState?.status, gameState?.turnStartTime, gameState]);
+    // The interval is re-armed whenever the turn or game status changes.
+  }, [gameStatus, turnStartTime]);
 
   const handleMove = useCallback(() => {
     if (!gameState || !input.trim()) return;

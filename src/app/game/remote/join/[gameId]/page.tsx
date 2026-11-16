@@ -1,121 +1,88 @@
 "use client";
 
-import React, { useState, useMemo, Suspense } from "react";
-import { useParams, useSearchParams } from "next/navigation";
-import {
-  Container,
-  Typography,
-  Button,
-  Paper,
-  TextField,
-  Box,
-} from "@mui/material";
+import { useState, useEffect, Suspense } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { Alert, Container, Typography, Button, Paper, TextField, Box } from "@mui/material";
+import type { RemoteGame } from "@/lib/remote-db";
 
 export default function RemoteJoinPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <RemoteJoinPageInner />
-    </Suspense>
-  );
+  return <Suspense fallback={<div>Loading...</div>}><WaitingRoom /></Suspense>;
 }
 
-function RemoteJoinPageInner() {
-  const { gameId } = useParams();
-  const searchParams = useSearchParams();
-  searchParams.get("player");
+function WaitingRoom() {
+  const { gameId } = useParams<{ gameId: string }>();
+  const router = useRouter();
+  const search = useSearchParams();
+  const player = search.get("player") === "1" ? 1 : 2;
+  const [name, setName] = useState("");
+  const [game, setGame] = useState<RemoteGame | null>(null);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  const [myName, setMyName] = useState("");
-  const [myReady] = useState(false);
-  const [opponentName] = useState("");
-  const [opponentReady] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    async function refresh() {
+      try {
+        const response = await fetch(`/api/remote/game/${gameId}`, { cache: "no-store" });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Failed to load room");
+        if (cancelled) return;
+        setGame(data.game);
+        if (data.game.status !== "waiting") router.replace(`/game/remote/${gameId}?player=${player}`);
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load room");
+      }
+    }
+    void refresh();
+    const interval = setInterval(refresh, 1500);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [gameId, player, router]);
 
-  const handleCopyLink = () => {
-    // should copy this link to the clipboard
-    // `${baseUrl}/game/remote/join/${gameId}?player=2`;
-  };
-
-  const handleReady = () => {
-    // 1. fires a post request to set name.
-    // 2. fires a post request to set ready.
+  async function ready() {
+    setBusy(true);
+    setError("");
+    try {
+      for (const [endpoint, body] of [["name", { player, name }], ["ready", { player }]] as const) {
+        const response = await fetch(`/api/remote/game/${gameId}/${endpoint}`, {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Could not join room");
+        setGame(data.game);
+        if (data.game.status !== "waiting") router.replace(`/game/remote/${gameId}?player=${player}`);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not join room");
+    } finally { setBusy(false); }
   }
 
-  const hasName = Boolean(myName);
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/game/remote/join/${gameId}?player=2`);
+    } catch { setError("Could not copy link. Share the room ID instead."); }
+  }
 
+  const myReady = player === 1 ? game?.player1Ready : game?.player2Ready;
+  const opponentName = player === 1 ? game?.player2Name : game?.player1Name;
+  const opponentReady = player === 1 ? game?.player2Ready : game?.player1Ready;
   return (
     <Container maxWidth="sm" sx={{ py: 4, textAlign: "center" }}>
-      <Typography variant="h1" gutterBottom color="secondary">
-        Replacle
-      </Typography>
-      <Typography variant="h3" gutterBottom sx={{ mb: 4 }}>
-        Waiting Room
-      </Typography>
-
-      {/* Share Link Card */}
+      <Typography variant="h1" gutterBottom color="secondary">Replacle</Typography>
+      <Typography variant="h3" gutterBottom sx={{ mb: 4 }}>Waiting Room</Typography>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       <Paper elevation={0} sx={{ p: 3, mb: 3, border: 1, borderColor: "divider" }}>
-        <Button 
-          variant="outlined"
-          fullWidth
-          onClick={handleCopyLink}
-          color="secondary"
-        >
-          Copy Room Link
-        </Button>
+        <Typography sx={{ mb: 2 }}>Room ID: {gameId}</Typography>
+        <Button variant="outlined" fullWidth onClick={copyLink} color="secondary">Copy Room Link</Button>
       </Paper>
-
-      {/* Name Input Card */}
-        <Paper elevation={0} sx={{ p: 3, mb: 3, border: 1, borderColor: "divider" }}>
-          <TextField
-            label="Your Name"
-            value={myName}
-            onChange={(e) => setMyName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && e.target.blur()}
-            autoFocus
-            fullWidth
-            variant="outlined"
-            sx={{ mb: 2 }}
-          />
-        </Paper>
-
-      {/* Status Card */}
+      <Paper elevation={0} sx={{ p: 3, mb: 3, border: 1, borderColor: "divider" }}>
+        <TextField label="Your Name" value={name} onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" && name.trim() && !myReady && !busy) void ready(); }}
+          autoFocus fullWidth disabled={Boolean(myReady)} slotProps={{ htmlInput: { maxLength: 40 } }} />
+      </Paper>
       <Paper elevation={0} sx={{ p: 3, border: 1, borderColor: "divider" }}>
-        {!hasName ? (
-          <Typography variant="body1" color="text.secondary" sx={{ textAlign: "center" }}>
-            Enter your name above to join
-          </Typography>
-        ) : (
-          <>
-            <Typography variant="body1" gutterBottom>
-              <strong>You:</strong> {myName}
-            </Typography>
-            <Box sx={{ mb: 2 }}>
-              {opponentName ? (
-                <Typography variant="body1" gutterBottom>
-                  <strong>Opponent:</strong> {opponentName}
-                  {opponentReady && <Box component="span" sx={{ ml: 1, color: "success.main" }}>(Ready)</Box>}
-                </Typography>
-              ) : (
-                <Typography variant="body1" color="text.secondary" gutterBottom>
-                  Waiting for opponent to join...
-                </Typography>
-              )}
-            </Box>
-            {myReady ? (
-              <Typography variant="body1" color="success.main" sx={{ textAlign: "center", mt: 2 }}>
-                Ready. Waiting for opponent...
-              </Typography>
-            ) : (
-              <Button
-                variant="contained"
-                color="secondary"
-                fullWidth
-                size="large"
-                onClick={handleReady}
-              >
-                Ready
-              </Button>
-            )}
-          </>
-        )}
+        <Box sx={{ mb: 2 }}>{opponentName ? <Typography>Opponent: {opponentName}{opponentReady ? " (Ready)" : ""}</Typography> : <Typography>Waiting for opponent to join...</Typography>}</Box>
+        {myReady ? <Typography color="success.main">Ready. Waiting for opponent...</Typography> :
+          <Button variant="contained" color="secondary" fullWidth size="large" disabled={!name.trim() || busy || !game} onClick={ready}>Ready</Button>}
       </Paper>
     </Container>
   );

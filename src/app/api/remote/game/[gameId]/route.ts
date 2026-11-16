@@ -1,29 +1,13 @@
-import { NextRequest, NextResponse } from "next/server"
-import { createRemoteGame, getRemoteGame } from "@/lib/remote-db"
+import { NextResponse } from "next/server";
+import { getRemoteGame } from "@/lib/remote-db";
 
-export async function POST(req: NextRequest) {
+export async function GET(_req: Request, { params }: { params: Promise<{ gameId: string }> }) {
   try {
-    const game = await createRemoteGame()
-    return NextResponse.json({ gameId: game.id })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to create game" }, { status: 500 })
-  }
-}
-
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> }
-) {
-  try {
-    const { gameId } = await params
-    const game = await getRemoteGame(gameId)
-
-    if (!game) {
-      return NextResponse.json({ error: "Game not found" }, { status: 404 })
-    }
-
-    return NextResponse.json({ game })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to load game" }, { status: 500 })
+    const { gameId } = await params;
+    const game = await getRemoteGame(gameId);
+    if (!game) return NextResponse.json({ error: "Game not found" }, { status: 404 });
+    return NextResponse.json({ game }, { headers: { "Cache-Control": "no-store" } });
+  } catch (err: unknown) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Failed to load game" }, { status: 500 });
   }
 }
