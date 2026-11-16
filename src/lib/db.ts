@@ -3,40 +3,21 @@ import { GameState, generateGameId } from "@/lib/game-state";
 
 const GAME_KEY = (id: string) => `game:local:${id}`;
 
-// In-memory fallback for local development when Redis env vars are not configured.
-const memoryStore = new Map<string, string>();
-
 const redis = new Redis({
   url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL,
   token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN,
 });
 
-const useRedis = !!(
-  process.env.KV_REST_API_URL ||
-  process.env.UPSTASH_REDIS_REST_URL ||
-  process.env.KV_REST_API_TOKEN ||
-  process.env.UPSTASH_REDIS_REST_TOKEN
-);
-
 async function readRaw(id: string): Promise<string | null> {
-  if (useRedis) return (await redis.get<string>(GAME_KEY(id))) ?? null;
-  return memoryStore.get(GAME_KEY(id)) ?? null;
+  return (await redis.get<string>(GAME_KEY(id))) ?? null;
 }
 
 async function writeRaw(id: string, value: string): Promise<void> {
-  if (useRedis) {
-    await redis.set(GAME_KEY(id), value);
-    return;
-  }
-  memoryStore.set(GAME_KEY(id), value);
+  await redis.set(GAME_KEY(id), value);
 }
 
 async function deleteRaw(id: string): Promise<void> {
-  if (useRedis) {
-    await redis.del(GAME_KEY(id));
-    return;
-  }
-  memoryStore.delete(GAME_KEY(id));
+  await redis.del(GAME_KEY(id));
 }
 
 export async function createLocalGame(
