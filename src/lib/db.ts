@@ -6,6 +6,8 @@ const GAME_KEY = (id: string) => `game:local:${id}`;
 const redis = new Redis({
   url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL,
   token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN,
+  // Game states are serialized explicitly below; keep Redis responses as strings.
+  automaticDeserialization: false,
 });
 
 async function readRaw(id: string): Promise<string | null> {
