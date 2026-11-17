@@ -31,22 +31,23 @@ test("player solves a solo puzzle from start to target", async ({ page }) => {
   await page.getByRole("button", { name: /solo challenge/i }).click();
   await expect(page).toHaveURL(/\/game\/solo$/);
 
-  // Read the generated puzzle from the start/target panel
+  // Read the generated puzzle from the start/target panel (letter tiles)
   await page.getByText("Target", { exact: true }).waitFor();
-  const start = await page
-    .getByText("Start", { exact: true })
-    .locator("..")
-    .locator("h3")
-    .innerText();
-  const target = await page
-    .getByText("Target", { exact: true })
-    .locator("..")
-    .locator("h3")
-    .innerText();
+  const readWord = async (label: string) => {
+    const tiles = page
+      .getByText(label, { exact: true })
+      .locator("..")
+      .locator(".MuiPaper-root");
+    return (await tiles.allTextContents()).join("").toLowerCase();
+  };
+  const start = await readWord("Start");
+  const target = await readWord("Target");
+  expect(start).toMatch(/^[a-z]{4}$/);
+  expect(target).toMatch(/^[a-z]{4}$/);
   expect(start).not.toBe(target);
 
   // A reload must not lose the run (localStorage persistence)
-  const ladder = shortestLadder(start.toLowerCase(), target.toLowerCase());
+  const ladder = shortestLadder(start, target);
   const input = page.getByLabel(/your word/i);
   const historyLog = page.getByRole("log", { name: /move history/i });
   await input.fill(ladder[1]);
