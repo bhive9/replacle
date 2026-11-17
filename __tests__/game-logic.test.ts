@@ -2,7 +2,6 @@ import {
   isOneLetterDifferent,
   getValidMoves,
   checkGameOver,
-  INITIAL_STATE,
   TURN_TIME_LIMIT,
 } from "@/lib/game-logic";
 
@@ -65,16 +64,5 @@ describe("checkGameOver", () => {
 
   it("returns false while at least one move is available", () => {
     expect(checkGameOver("cold", dictionary, [])).toBe(false);
-  });
-});
-
-describe("INITIAL_STATE", () => {
-  it("starts player 1 in setup with an empty history", () => {
-    expect(INITIAL_STATE.currentPlayer).toBe(1);
-    expect(INITIAL_STATE.status).toBe("setup");
-    expect(INITIAL_STATE.history).toEqual([]);
-    expect(INITIAL_STATE.winner).toBeNull();
-    expect(INITIAL_STATE.error).toBeNull();
-    expect(INITIAL_STATE.timeRemaining).toBe(TURN_TIME_LIMIT);
   });
 });

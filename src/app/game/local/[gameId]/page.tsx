@@ -140,21 +140,24 @@ function LocalGameInner() {
 
     const word = input.trim().toLowerCase();
     const lastWord = gameState.history[gameState.history.length - 1];
+    const fail = (message: string) => {
+      setGameState(s => (s ? { ...s, error: message } : s));
+    };
 
     if (word.length !== 4) {
-      setGameState(s => s ? { ...s, error: "Word must be 4 letters long!" } : null);
+      fail("Word must be 4 letters long!");
       return;
     }
     if (gameState.history.includes(word)) {
-      setGameState(s => s ? { ...s, error: "Word already used!" } : null);
+      fail("Word already used!");
       return;
     }
     if (!dictionary.has(word)) {
-      setGameState(s => s ? { ...s, error: "That's not in my dictionary!" } : null);
+      fail("That's not in my dictionary!");
       return;
     }
     if (!isOneLetterDifferent(lastWord, word)) {
-      setGameState(s => s ? { ...s, error: "Must change exactly one letter!" } : null);
+      fail("Must change exactly one letter!");
       return;
     }
 

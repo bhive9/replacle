@@ -9,29 +9,6 @@ export function isOneLetterDifferent(word1: string, word2: string): boolean {
   return differences === 1;
 }
 
-export type GameStatus = "setup" | "playing" | "game_over";
-
-export interface GameState {
-  id?: string;
-  history: string[];
-  currentPlayer: 1 | 2;
-  status: GameStatus;
-  winner: 1 | 2 | null;
-  error: string | null;
-  turnStartTime: number | null;
-  timeRemaining: number;
-}
-
-export const INITIAL_STATE: GameState = {
-  history: [],
-  currentPlayer: 1,
-  status: "setup",
-  winner: null,
-  error: null,
-  turnStartTime: null,
-  timeRemaining: 30,
-};
-
 export const TURN_TIME_LIMIT = 30;
 
 export function getValidMoves(currentWord: string, dictionary: Set<string>, history: string[]): string[] {

@@ -1,5 +1,6 @@
 import { Redis } from "@upstash/redis";
 import { GameState, generateGameId } from "@/lib/game-state";
+import { TURN_TIME_LIMIT } from "@/lib/game-logic";
 
 const GAME_KEY = (id: string) => `game:local:${id}`;
 
@@ -9,18 +10,6 @@ const redis = new Redis({
   // Game states are serialized explicitly below; keep Redis responses as strings.
   automaticDeserialization: false,
 });
-
-async function readRaw(id: string): Promise<string | null> {
-  return (await redis.get<string>(GAME_KEY(id))) ?? null;
-}
-
-async function writeRaw(id: string, value: string): Promise<void> {
-  await redis.set(GAME_KEY(id), value);
-}
-
-async function deleteRaw(id: string): Promise<void> {
-  await redis.del(GAME_KEY(id));
-}
 
 export async function createLocalGame(
   player1Name: string,
@@ -38,24 +27,20 @@ export async function createLocalGame(
     winner: null,
     error: null,
     turnStartTime: null,
-    timeRemaining: 30,
+    timeRemaining: TURN_TIME_LIMIT,
     createdAt: now,
     updatedAt: now,
   };
-  await writeRaw(id, JSON.stringify(state));
+  await redis.set(GAME_KEY(id), JSON.stringify(state));
   return state;
 }
 
 export async function getLocalGame(id: string): Promise<GameState | null> {
-  const raw = await readRaw(id);
+  const raw = (await redis.get<string>(GAME_KEY(id))) ?? null;
   return raw ? (JSON.parse(raw) as GameState) : null;
 }
 
 export async function saveLocalGame(state: GameState): Promise<void> {
-  state.updatedAt = Date.now();
-  await writeRaw(state.id, JSON.stringify(state));
-}
-
-export async function deleteLocalGame(id: string): Promise<void> {
-  await deleteRaw(id);
+  // Write a copy so the caller's object is not mutated as a side effect.
+  await redis.set(GAME_KEY(state.id), JSON.stringify({ ...state, updatedAt: Date.now() }));
 }
