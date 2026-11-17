@@ -19,10 +19,17 @@ describe("HomePage", () => {
     expect(heading).toBeInTheDocument();
   });
 
-  it("navigates to the solo challenge when Solo Challenge is clicked", () => {
+  it("navigates to Letter Hop when its button is clicked", () => {
     render(<HomePage />);
-    fireEvent.click(screen.getByRole("button", { name: /solo challenge/i }));
-    expect(mockPush).toHaveBeenCalledWith("/game/solo");
+    fireEvent.click(screen.getByRole("button", { name: /letter hop/i }));
+    expect(mockPush).toHaveBeenCalledWith("/game/letter-hop");
+  });
+
+  it("groups the two two-player modes under one label", () => {
+    render(<HomePage />);
+    expect(screen.getByText(/two players/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /pass and play/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /play remote/i })).toBeInTheDocument();
   });
 
   it("navigates to the local join page when Pass and Play is clicked", () => {

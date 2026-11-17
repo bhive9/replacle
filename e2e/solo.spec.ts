@@ -28,8 +28,8 @@ function shortestLadder(start: string, target: string): string[] {
 
 test("player solves a solo puzzle from start to target", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: /solo challenge/i }).click();
-  await expect(page).toHaveURL(/\/game\/solo$/);
+  await page.getByRole("button", { name: /letter hop/i }).click();
+  await expect(page).toHaveURL(/\/game\/letter-hop$/);
 
   // Read the generated puzzle from the start/target panel (letter tiles)
   await page.getByText("Target", { exact: true }).waitFor();
