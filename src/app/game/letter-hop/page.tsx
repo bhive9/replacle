@@ -5,7 +5,6 @@ import { Chip, IconButton, Typography } from "@mui/material";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import GamePageContainer from "@/components/game/GamePageContainer";
 import GameHeader from "@/components/game/GameHeader";
-import WordDisplay from "@/components/game/WordDisplay";
 import HistoryList from "@/components/game/HistoryList";
 import WordInput from "@/components/game/WordInput";
 import SoloWinScreen from "@/components/game/SoloWinScreen";
@@ -59,7 +58,6 @@ function SoloGameInner() {
     );
   }
 
-  const currentWord = history[history.length - 1];
   const moves = history.length - 1;
 
   return (
@@ -68,10 +66,9 @@ function SoloGameInner() {
 
       <LadderGoal start={puzzle.start} target={puzzle.target} par={puzzle.par} />
 
-      <WordDisplay word={currentWord} compact />
-
       <HistoryList
         history={history}
+        layout="linear"
         headerAction={
           <>
             <Chip label={`Moves: ${moves}`} size="small" variant="outlined" color="primary" />

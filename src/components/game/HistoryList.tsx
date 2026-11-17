@@ -11,10 +11,14 @@ import HistoryIcon from "@mui/icons-material/History";
 export default function HistoryList({
   history,
   headerAction,
+  layout = "alternating",
 }: {
   history: string[];
   /** Optional control rendered at the far right of the header row. */
   headerAction?: ReactNode;
+  /** "alternating": chips zigzag left/right (two-player turns).
+   *  "linear": a plain top-to-bottom ladder (single player). */
+  layout?: "alternating" | "linear";
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -44,11 +48,17 @@ export default function HistoryList({
       >
         {history.map((word, i) => (
           <Fade in key={i}>
-            <Box sx={{ display: "flex", justifyContent: i % 2 === 0 ? "flex-start" : "flex-end" }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent:
+                  layout === "linear" ? "flex-start" : i % 2 === 0 ? "flex-start" : "flex-end",
+              }}
+            >
               <Chip
                 label={word.toUpperCase()}
                 variant={i === history.length - 1 ? "filled" : "outlined"}
-                color={i % 2 === 0 ? "primary" : "secondary"}
+                color={layout === "linear" ? "secondary" : i % 2 === 0 ? "primary" : "secondary"}
                 sx={{ fontSize: "1.1rem", height: "2.25rem", fontWeight: 600 }}
               />
             </Box>
