@@ -81,6 +81,28 @@ describe("useSoloGame", () => {
     await waitFor(() => expect(result.current.status).toBe("playing"));
     expect(result.current.history).toHaveLength(1);
   });
+
+  it("reset restarts the same puzzle with progress cleared", async () => {
+    const { result } = renderHook(() => useSoloGame(true, dictionary));
+    await waitFor(() => expect(result.current.status).toBe("playing"));
+    const target = result.current.puzzle!.target;
+
+    const ladder = solveTo(result.current.puzzle!.start, target, dictionary);
+    for (const word of ladder.slice(1, 3)) {
+      act(() => result.current.play(word));
+    }
+    expect(result.current.history.length).toBeGreaterThan(1);
+
+    act(() => result.current.reset());
+    expect(result.current.puzzle!.target).toBe(target); // same puzzle
+    expect(result.current.history).toHaveLength(1);
+    expect(result.current.status).toBe("playing");
+
+    // The reset run is what persists
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)!);
+    expect(saved.puzzle.target).toBe(target);
+    expect(saved.history).toHaveLength(1);
+  });
 });
 
 function shortestStep(a: string, b: string) {

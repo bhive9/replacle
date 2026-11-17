@@ -1,13 +1,15 @@
 "use client";
 
 import React, { Suspense, useEffect, useState } from "react";
-import { Box, Chip, Paper, Typography } from "@mui/material";
+import { Box, Chip, IconButton, Paper, Typography } from "@mui/material";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import GamePageContainer from "@/components/game/GamePageContainer";
 import GameHeader from "@/components/game/GameHeader";
 import WordDisplay from "@/components/game/WordDisplay";
 import HistoryList from "@/components/game/HistoryList";
 import WordInput from "@/components/game/WordInput";
 import SoloWinScreen from "@/components/game/SoloWinScreen";
+import LadderGoal from "@/components/game/LadderGoal";
 import { useSoloGame } from "@/hooks/useSoloGame";
 
 function SoloGameInner() {
@@ -26,7 +28,7 @@ function SoloGameInner() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const { status, puzzle, history, error, play, newGame, clearError } = useSoloGame(
+  const { status, puzzle, history, error, play, newGame, reset, clearError } = useSoloGame(
     !isLoading && dictionary.size > 0,
     dictionary
   );
@@ -64,35 +66,27 @@ function SoloGameInner() {
     <GamePageContainer>
       <GameHeader onNewGame={newGame} />
 
-      {/* Puzzle: start → target */}
-      <Paper
-        elevation={0}
-        sx={{
-          p: 2, mb: 3, borderRadius: 4, flexShrink: 0,
-          border: 1, borderColor: "divider",
-          display: "flex", justifyContent: "space-between", alignItems: "center", px: 3,
-        }}
-      >
-        <Box sx={{ textAlign: "left" }}>
-          <Typography variant="caption" color="text.secondary">Start</Typography>
-          <Typography variant="h3" sx={{ fontWeight: 700 }}>{puzzle.start.toUpperCase()}</Typography>
-        </Box>
-        <Typography variant="h3" color="primary.main">→</Typography>
-        <Box sx={{ textAlign: "right" }}>
-          <Typography variant="caption" color="text.secondary">Target</Typography>
-          <Typography variant="h3" sx={{ fontWeight: 700 }}>{puzzle.target.toUpperCase()}</Typography>
-        </Box>
-      </Paper>
-
-      {/* Progress */}
-      <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mb: 2, flexShrink: 0 }}>
-        <Chip label={`Moves: ${moves}`} variant="outlined" color="primary" />
-        <Chip label={`Par: ${puzzle.par}`} variant="outlined" color="secondary" />
-      </Box>
+      <LadderGoal start={puzzle.start} target={puzzle.target} par={puzzle.par} />
 
       <WordDisplay word={currentWord} />
 
-      <HistoryList history={history} />
+      <HistoryList
+        history={history}
+        headerAction={
+          <>
+            <Chip label={`Moves: ${moves}`} size="small" variant="outlined" color="primary" />
+            <IconButton
+              onClick={reset}
+              title="Reset puzzle"
+              aria-label="Reset puzzle"
+              disabled={moves === 0}
+              size="small"
+            >
+              <RestartAltIcon />
+            </IconButton>
+          </>
+        }
+      />
 
       <WordInput
         value={input}

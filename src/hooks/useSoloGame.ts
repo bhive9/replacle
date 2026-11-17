@@ -103,6 +103,16 @@ export function useSoloGame(ready: boolean, dictionary: Set<string>) {
     beginGame(null);
   }, [beginGame]);
 
+  /** Restarts the same puzzle from its start word. */
+  const reset = useCallback(() => {
+    if (!puzzle) return;
+    const fresh = { puzzle, history: [puzzle.start] } satisfies SavedSoloGame;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
+    setHistory([puzzle.start]);
+    setStatus("playing");
+    setError(null);
+  }, [puzzle]);
+
   return {
     status,
     puzzle,
@@ -110,6 +120,7 @@ export function useSoloGame(ready: boolean, dictionary: Set<string>) {
     error,
     play,
     newGame,
+    reset,
     clearError: () => setError(null),
   };
 }
