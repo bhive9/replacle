@@ -68,7 +68,7 @@ function SoloGameInner() {
 
       <LadderGoal start={puzzle.start} target={puzzle.target} par={puzzle.par} />
 
-      <WordDisplay word={currentWord} />
+      <WordDisplay word={currentWord} compact />
 
       <HistoryList
         history={history}

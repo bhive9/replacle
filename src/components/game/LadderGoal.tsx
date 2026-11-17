@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Chip, Paper, Typography } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 
 interface LadderGoalProps {
@@ -11,18 +11,19 @@ interface LadderGoalProps {
 
 function TileRow({ word, goal = false }: { word: string; goal?: boolean }) {
   return (
-    <Box sx={{ display: "flex", gap: 0.5 }}>
+    <Box sx={{ display: "flex", gap: 0.25 }}>
       {word.split("").map((char, i) => (
         <Paper
           key={i}
           elevation={2}
           sx={{
-            width: 34, height: 42,
+            width: { xs: 24, sm: 34 }, height: { xs: 30, sm: 42 },
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "1.35rem", fontWeight: 700, borderRadius: 1.5,
+            fontSize: { xs: "1.05rem", sm: "1.35rem" }, fontWeight: 700, borderRadius: 1.5,
             bgcolor: goal ? "primary.main" : "white",
             color: goal ? "white" : "text.primary",
             border: goal ? "none" : "1px solid", borderColor: "divider",
+            flexShrink: 0,
           }}
         >
           {char.toUpperCase()}
@@ -41,9 +42,10 @@ export default function LadderGoal({ start, target, par }: LadderGoalProps) {
     <Paper
       elevation={0}
       sx={{
-        p: 2, mb: 3, borderRadius: 4, flexShrink: 0,
+        p: 1.25, mb: 3, borderRadius: 4, flexShrink: 0,
         border: 1, borderColor: "divider",
-        display: "flex", alignItems: "center", justifyContent: "center", gap: 2,
+        display: "flex", alignItems: "center", justifyContent: "center", gap: 1,
+        maxWidth: "100%",
       }}
     >
       <Box sx={{ textAlign: "center" }}>
@@ -54,8 +56,10 @@ export default function LadderGoal({ start, target, par }: LadderGoalProps) {
       </Box>
 
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", px: 0.5 }}>
-        <ArrowRightIcon color="primary" sx={{ fontSize: 32 }} />
-        <Chip label={`Par ${par}`} size="small" variant="outlined" color="secondary" />
+        <ArrowRightIcon color="primary" sx={{ fontSize: { xs: 22, sm: 32 } }} />
+        <Typography variant="caption" sx={{ fontWeight: 700, fontSize: { xs: "0.7rem", sm: "0.75rem" } }}>
+          Par {par}
+        </Typography>
       </Box>
 
       <Box sx={{ textAlign: "center" }}>

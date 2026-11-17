@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Box, Button, Container, Paper, Typography } from "@mui/material";
+import { Box, Button, Container, Typography } from "@mui/material";
 
 export default function HomePage() {
   const router = useRouter();
@@ -12,17 +12,10 @@ export default function HomePage() {
         Replacle
       </Typography>
 
-      {/* Single-player mode, its own card */}
-      <Paper
-        elevation={0}
-        sx={{ p: 3, mb: 5, border: 1, borderColor: "divider", borderRadius: 4 }}
-      >
-        <Typography variant="h2" gutterBottom>
-          Letter Hop
-        </Typography>
+      {/* Single-player mode */}
+      <Box sx={{ mb: 5 }}>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          One player, this device. Hop from the start word to the target,
-          one letter at a time.
+          Single player
         </Typography>
         <Button
           variant="contained"
@@ -33,7 +26,7 @@ export default function HomePage() {
         >
           Letter Hop
         </Button>
-      </Paper>
+      </Box>
 
       {/* Two-player modes, grouped */}
       <Box>

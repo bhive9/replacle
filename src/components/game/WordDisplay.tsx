@@ -2,7 +2,10 @@
 
 import { Box, Paper, Typography } from "@mui/material";
 
-export default function WordDisplay({ word }: { word: string }) {
+export default function WordDisplay({ word, compact = false }: { word: string; compact?: boolean }) {
+  const tile = compact
+    ? { width: 44, height: 54, fontSize: "1.9rem" }
+    : { width: 60, height: 70, fontSize: "2.5rem" };
   return (
     <Box
       sx={{
@@ -17,8 +20,8 @@ export default function WordDisplay({ word }: { word: string }) {
             key={i}
             elevation={2}
             sx={{
-              width: 60, height: 70, display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "2.5rem", fontWeight: "bold", bgcolor: "white", borderRadius: 2,
+              width: tile.width, height: tile.height, display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: tile.fontSize, fontWeight: "bold", bgcolor: "white", borderRadius: 2,
             }}
           >
             {char.toUpperCase()}

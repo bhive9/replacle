@@ -25,9 +25,11 @@ describe("HomePage", () => {
     expect(mockPush).toHaveBeenCalledWith("/game/letter-hop");
   });
 
-  it("groups the two two-player modes under one label", () => {
+  it("groups the modes under player-count labels", () => {
     render(<HomePage />);
+    expect(screen.getByText(/single player/i)).toBeInTheDocument();
     expect(screen.getByText(/two players/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /letter hop/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /pass and play/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /play remote/i })).toBeInTheDocument();
   });
