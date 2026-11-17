@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, Suspense } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import {
   Container,
   Typography,
@@ -18,41 +18,21 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import HistoryIcon from "@mui/icons-material/History";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import TurnCountdown from "@/components/TurnCountdown";
-import type { RemoteGame } from "@/lib/remote-db";
+import { useRemoteGameStream } from "@/hooks/useRemoteGameStream";
 
 function RemoteGameInner() {
   const { gameId } = useParams<{ gameId: string }>();
-  const router = useRouter();
   const search = useSearchParams();
   const player = search.get("player") === "2" ? 2 : 1;
-  const [game, setGame] = useState<RemoteGame | null>(null);
+  const { game, setGame, error: streamError } = useRemoteGameStream(gameId, player);
   const [input, setInput] = useState("");
-  const [error, setError] = useState("");
+  const [actionError, setActionError] = useState("");
   const [busy, setBusy] = useState(false);
+  const error = actionError || streamError;
   // Tracks which turn the local timeout edge fired for; a new turnStartTime
   // automatically re-enables input without a reset effect.
   const [timedOutForTurn, setTimedOutForTurn] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Poll game state; timeouts are decided server-side.
-  useEffect(() => {
-    let stopped = false;
-    async function refresh() {
-      try {
-        const response = await fetch(`/api/remote/game/${gameId}`, { cache: "no-store" });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Failed to load game");
-        if (stopped) return;
-        setGame(data.game);
-        if (data.game.status === "waiting") router.replace(`/game/remote/join/${gameId}?player=${player}`);
-      } catch (err) {
-        if (!stopped) setError(err instanceof Error ? err.message : "Failed to load game");
-      }
-    }
-    void refresh();
-    const interval = setInterval(refresh, 1500);
-    return () => { stopped = true; clearInterval(interval); };
-  }, [gameId, player, router]);
 
   // Auto-scroll history
   useEffect(() => {
@@ -63,7 +43,7 @@ function RemoteGameInner() {
 
   async function action(endpoint: "move" | "restart", body: object = {}) {
     setBusy(true);
-    setError("");
+    setActionError("");
     try {
       const response = await fetch(`/api/remote/game/${gameId}/${endpoint}`, {
         method: "POST",
@@ -75,7 +55,7 @@ function RemoteGameInner() {
       setGame(data.game);
       if (endpoint === "move") setInput("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Request failed");
+      setActionError(err instanceof Error ? err.message : "Request failed");
     } finally {
       setBusy(false);
     }
@@ -222,7 +202,7 @@ function RemoteGameInner() {
       {/* Input */}
       <Box sx={{ pb: 2 }}>
         {error && (
-          <Alert severity="error" sx={{ mb: 2, borderRadius: 3 }} onClose={() => setError("")}>
+          <Alert severity="error" sx={{ mb: 2, borderRadius: 3 }} onClose={() => setActionError("")}>
             {error}
           </Alert>
         )}
@@ -233,7 +213,7 @@ function RemoteGameInner() {
             value={input}
             onChange={(e) => {
               setInput(e.target.value.slice(0, 4).toUpperCase());
-              if (error) setError("");
+              if (error) setActionError("");
             }}
             onKeyDown={(e) => e.key === "Enter" && isMyTurn && !busy && void action("move", { player, word: input })}
             autoFocus
