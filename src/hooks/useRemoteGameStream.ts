@@ -1,16 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import type { RemoteGame } from "@/lib/remote-db";
 
 /**
  * Subscribes to the server-sent game event stream and keeps the latest state
  * in local React state. Replaces per-client polling: the server polls KV once
- * per stream and pushes only changed states.
+ * per stream and pushes only changed states. Navigation on status changes is
+ * the caller's job, so the same hook serves both the game and join pages.
  */
-export function useRemoteGameStream(gameId: string, player: 1 | 2) {
-  const router = useRouter();
+export function useRemoteGameStream(gameId: string) {
   const [game, setGame] = useState<RemoteGame | null>(null);
   const [error, setError] = useState("");
 
@@ -21,11 +20,7 @@ export function useRemoteGameStream(gameId: string, player: 1 | 2) {
     source.onmessage = (event) => {
       if (stopped) return;
       try {
-        const data = JSON.parse(event.data) as RemoteGame;
-        setGame(data);
-        if (data.status === "waiting") {
-          router.replace(`/game/remote/join/${gameId}?player=${player}`);
-        }
+        setGame(JSON.parse(event.data) as RemoteGame);
       } catch {
         setError("Received invalid game data");
       }
@@ -44,7 +39,7 @@ export function useRemoteGameStream(gameId: string, player: 1 | 2) {
       stopped = true;
       source.close();
     };
-  }, [gameId, player, router]);
+  }, [gameId]);
 
   return { game, setGame, error };
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, Suspense } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   Container,
   Typography,
@@ -24,7 +24,8 @@ function RemoteGameInner() {
   const { gameId } = useParams<{ gameId: string }>();
   const search = useSearchParams();
   const player = search.get("player") === "2" ? 2 : 1;
-  const { game, setGame, error: streamError } = useRemoteGameStream(gameId, player);
+  const { game, setGame, error: streamError } = useRemoteGameStream(gameId);
+  const router = useRouter();
   const [input, setInput] = useState("");
   const [actionError, setActionError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -33,6 +34,11 @@ function RemoteGameInner() {
   // automatically re-enables input without a reset effect.
   const [timedOutForTurn, setTimedOutForTurn] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Back in the lobby if the server says the game is waiting (e.g. rematch reset).
+  useEffect(() => {
+    if (game?.status === "waiting") router.replace(`/game/remote/join/${gameId}?player=${player}`);
+  }, [game?.status, gameId, player, router]);
 
   // Auto-scroll history
   useEffect(() => {
