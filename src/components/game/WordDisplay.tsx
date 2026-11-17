@@ -4,8 +4,8 @@ import { Box, Paper, Typography } from "@mui/material";
 
 export default function WordDisplay({ word, compact = false }: { word: string; compact?: boolean }) {
   const tile = compact
-    ? { width: 44, height: 54, fontSize: "1.9rem" }
-    : { width: 60, height: 70, fontSize: "2.5rem" };
+    ? { width: "2.75rem", height: "3.375rem", fontSize: "2rem" }
+    : { width: "3.75rem", height: "4.375rem", fontSize: "2.5rem" };
   return (
     <Box
       sx={{

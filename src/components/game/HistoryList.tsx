@@ -49,7 +49,7 @@ export default function HistoryList({
                 label={word.toUpperCase()}
                 variant={i === history.length - 1 ? "filled" : "outlined"}
                 color={i % 2 === 0 ? "primary" : "secondary"}
-                sx={{ fontSize: "1.1rem", height: 36, fontWeight: 600 }}
+                sx={{ fontSize: "1.1rem", height: "2.25rem", fontWeight: 600 }}
               />
             </Box>
           </Fade>

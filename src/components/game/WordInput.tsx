@@ -50,7 +50,7 @@ export default function WordInput({
           sx={{
             borderRadius: 3,
             bgcolor: disabled ? "grey.100" : "white",
-            height: 52,
+            height: "3.25rem",
             fontSize: "1.25rem",
             letterSpacing: 2,
             textTransform: "uppercase",
@@ -71,8 +71,8 @@ export default function WordInput({
           onClick={onSubmit}
           disabled={disabled || !value.trim()}
           sx={{
-            height: 52,
-            minWidth: 52,
+            height: "3.25rem",
+            minWidth: "3.25rem",
             borderRadius: 3,
             padding: 0,
             boxShadow: 3,

@@ -17,9 +17,9 @@ function TileRow({ word, goal = false }: { word: string; goal?: boolean }) {
           key={i}
           elevation={2}
           sx={{
-            width: { xs: 24, sm: 34 }, height: { xs: 30, sm: 42 },
+            width: { xs: "1.5rem", sm: "2.125rem" }, height: { xs: "1.875rem", sm: "2.625rem" },
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: { xs: "1.05rem", sm: "1.35rem" }, fontWeight: 700, borderRadius: 1.5,
+            fontSize: { xs: "1.05rem", sm: "1.35rem" }, fontWeight: 700, borderRadius: 1,
             bgcolor: goal ? "primary.main" : "white",
             color: goal ? "white" : "text.primary",
             border: goal ? "none" : "1px solid", borderColor: "divider",
@@ -56,7 +56,7 @@ export default function LadderGoal({ start, target, par }: LadderGoalProps) {
       </Box>
 
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", px: 0.5 }}>
-        <ArrowRightIcon color="primary" sx={{ fontSize: { xs: 22, sm: 32 } }} />
+        <ArrowRightIcon color="primary" sx={{ fontSize: { xs: "1.375rem", sm: "2rem" } }} />
         <Typography variant="caption" sx={{ fontWeight: 700, fontSize: { xs: "0.7rem", sm: "0.75rem" } }}>
           Par {par}
         </Typography>
