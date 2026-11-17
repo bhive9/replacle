@@ -19,6 +19,12 @@ describe("HomePage", () => {
     expect(heading).toBeInTheDocument();
   });
 
+  it("navigates to the solo challenge when Solo Challenge is clicked", () => {
+    render(<HomePage />);
+    fireEvent.click(screen.getByRole("button", { name: /solo challenge/i }));
+    expect(mockPush).toHaveBeenCalledWith("/game/solo");
+  });
+
   it("navigates to the local join page when Pass and Play is clicked", () => {
     render(<HomePage />);
     fireEvent.click(screen.getByRole("button", { name: /pass and play/i }));

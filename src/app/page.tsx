@@ -14,6 +14,16 @@ export default function HomePage() {
       <Button
         variant="contained"
         size="large"
+        onClick={() => router.push("/game/solo")}
+        color="secondary"
+        fullWidth
+        sx={{ mb: 2 }}
+      >
+        Solo Challenge
+      </Button>
+      <Button
+        variant="contained"
+        size="large"
         onClick={() => router.push("/game/local/join")}
         color="secondary"
         fullWidth
