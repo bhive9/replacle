@@ -13,6 +13,8 @@ export interface GameState {
   timeRemaining: number;
   createdAt: number;
   updatedAt: number;
+  /** How the game ended; absent while playing. Older saved games may not have it. */
+  endReason?: "timeout" | "no_moves" | null;
 }
 
 export const generateGameId = () => Math.random().toString(36).substring(2, 8);

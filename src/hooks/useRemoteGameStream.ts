@@ -21,6 +21,7 @@ export function useRemoteGameStream(gameId: string) {
       if (stopped) return;
       try {
         setGame(JSON.parse(event.data) as RemoteGame);
+        setError(""); // the stream recovered from any earlier hiccup
       } catch {
         setError("Received invalid game data");
       }

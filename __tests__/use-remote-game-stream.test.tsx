@@ -76,6 +76,15 @@ describe("useRemoteGameStream", () => {
     await waitFor(() => expect(result.current.error).not.toBe(""));
   });
 
+  it("clears a connection error when the stream delivers again", async () => {
+    const { result } = renderHook(() => useRemoteGameStream("abc123"));
+    act(() => FakeEventSource.instances[0].connectionLost());
+    await waitFor(() => expect(result.current.error).not.toBe(""));
+
+    act(() => FakeEventSource.instances[0].emit(pushedGame));
+    await waitFor(() => expect(result.current.error).toBe(""));
+  });
+
   it("closes the subscription on unmount", () => {
     const { unmount } = renderHook(() => useRemoteGameStream("abc123"));
     const source = FakeEventSource.instances[0];
