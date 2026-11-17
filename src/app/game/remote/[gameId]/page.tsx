@@ -125,7 +125,7 @@ function RemoteGameInner() {
       {/* Header */}
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, flexShrink: 0 }}>
         <Typography variant="h3" color="secondary" sx={{ m: 0 }}>Replacle</Typography>
-        <IconButton onClick={() => action("restart")} title="New Game" disabled={busy}>
+        <IconButton onClick={() => action("restart")} title="New Game" aria-label="New game" disabled={busy}>
           <RefreshIcon />
         </IconButton>
       </Box>
@@ -145,7 +145,7 @@ function RemoteGameInner() {
           flexShrink: 0,
         }}
       >
-        <Typography variant="h3" sx={{ m: 0, color: "inherit" }}>
+        <Typography variant="h2" sx={{ m: 0, color: "inherit" }}>
           {currentPlayerName}&apos;s Turn
         </Typography>
         <Typography variant="h3" sx={{ m: 0, color: "inherit", fontWeight: 700 }}>
@@ -161,7 +161,7 @@ function RemoteGameInner() {
 
       {/* Current Word Display */}
       <Box sx={{ textAlign: "center", mb: 4, py: 4, border: "2px dashed", borderColor: "primary.main", borderRadius: 4, flexShrink: 0 }}>
-        <Typography variant="caption" sx={{ textTransform: "uppercase", letterSpacing: 2 }}>Current Word</Typography>
+        <Typography variant="caption" sx={{ letterSpacing: 2 }}>Current word</Typography>
         <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mt: 1 }}>
           {currentWord.split("").map((char, i) => (
             <Paper
@@ -186,6 +186,9 @@ function RemoteGameInner() {
         </Box>
         <Box
           ref={scrollRef}
+          role="log"
+          aria-label="Move history"
+          tabIndex={0}
           sx={{
             flexGrow: 1, overflowY: "auto", pr: 1,
             display: "flex", flexDirection: "column", gap: 1,
@@ -218,6 +221,7 @@ function RemoteGameInner() {
           <OutlinedInput
             fullWidth
             placeholder="Type next word..."
+            aria-label="Your word"
             value={input}
             onChange={(e) => {
               setInput(e.target.value.slice(0, 4).toUpperCase());

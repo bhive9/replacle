@@ -1,7 +1,10 @@
 import { createTheme, Shadows } from "@mui/material/styles";
 
 const tokens = {
-  primary: "#49B6E5",
+  // Brand accent. The raw brand blue #49B6E5 only reaches 2.31:1 against white,
+  // so text-bearing surfaces use this darkened AA-compliant tone (≥ 4.5:1 on
+  // both white and the app background).
+  primary: "#18719E",
   secondary: "#263D5B",
   success: "#16A34A",
   warning: "#D97706",
@@ -68,6 +71,14 @@ export const doodleTheme = createTheme({
         root: {
           borderRadius: 999,
           fontWeight: 600,
+        },
+      },
+    },
+    // MUI's default outlined label grey falls just short of AA on light surfaces.
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          color: tokens.text,
         },
       },
     },

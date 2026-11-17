@@ -55,7 +55,7 @@ function WaitingRoom() {
   return (
     <Container maxWidth="sm" sx={{ py: 4, textAlign: "center" }}>
       <Typography variant="h1" gutterBottom color="secondary">Replacle</Typography>
-      <Typography variant="h3" gutterBottom sx={{ mb: 4 }}>Waiting Room</Typography>
+      <Typography variant="h2" gutterBottom sx={{ mb: 4 }}>Waiting Room</Typography>
       {(error || streamError) && <Alert severity="error" sx={{ mb: 2 }}>{error || streamError}</Alert>}
       <Paper elevation={0} sx={{ p: 3, mb: 3, border: 1, borderColor: "divider" }}>
         <Typography sx={{ mb: 2 }}>Room ID: {gameId}</Typography>

@@ -8,7 +8,7 @@ A creative, playful, and informal style that uses doodles, sketches, handwritten
 
 | Token | Value | Usage |
 |---|---|---|
-| primary | `#49B6E5` | main brand accent, CTAs |
+| primary | `#1B7DB0` | main brand accent, CTAs. Darkened from the brand sketch blue `#49B6E5`, which only reaches 2.31:1 on white and cannot carry AA text |
 | secondary | `#263D5B` | supporting surfaces, headers |
 | success | `#16A34A` | positive states |
 | warning | `#D97706` | caution states |

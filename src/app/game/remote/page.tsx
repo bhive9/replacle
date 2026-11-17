@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import {
+  Alert,
   Container,
   Typography,
   Button,
@@ -23,7 +24,6 @@ export default function RemoteHub() {
     fetch("/api/remote/game", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ player1Name: "Player 1" }),
     })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to create game")
@@ -39,8 +39,13 @@ export default function RemoteHub() {
   }
 
   const handleJoin = () => {
-    if (!roomId.trim()) return
-    router.push(`/game/remote/join/${roomId.trim().toLowerCase()}?player=2`)
+    const id = roomId.trim().toLowerCase();
+    if (!/^[a-z0-9]{4,8}$/.test(id)) {
+      setError("Room IDs are 4-8 letters and digits.");
+      return;
+    }
+    setError("");
+    router.push(`/game/remote/join/${id}?player=2`);
   }
 
   return (
@@ -53,7 +58,7 @@ export default function RemoteHub() {
       </Typography>
 
       <Paper elevation={0} sx={{ p: 4, border: 1, borderColor: "divider" }}>
-        {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>}
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         <Button
           variant="contained"
           size="large"
@@ -67,7 +72,7 @@ export default function RemoteHub() {
         </Button>
 
         <Typography variant="body2" color="text.secondary" align="center" sx={{ my: 3 }}>
-          OR JOIN AN EXISTING ROOM
+          Or join an existing room
         </Typography>
 
         <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
