@@ -254,9 +254,9 @@ function LocalGameInner() {
   const currentPlayerName = gameState.currentPlayer === 1 ? gameState.player1Name : gameState.player2Name;
 
   return (
-    <Container maxWidth="sm" sx={{ py: 4, height: "100vh", display: "flex", flexDirection: "column" }}>
+    <Container maxWidth="sm" sx={{ py: 4, height: "100dvh", overflow: "hidden", display: "flex", flexDirection: "column" }}>
       {/* Header */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, flexShrink: 0 }}>
         <Typography variant="h3" color="secondary" sx={{ m: 0 }}>Replacle</Typography>
         <IconButton onClick={startNewGame} title="New Game">
           <RefreshIcon />
@@ -275,6 +275,7 @@ function LocalGameInner() {
           justifyContent: "space-between",
           alignItems: "center",
           px: 3,
+          flexShrink: 0,
         }}
       >
         <Typography variant="h3" sx={{ m: 0, color: "inherit" }}>
@@ -290,7 +291,7 @@ function LocalGameInner() {
       </Paper>
 
       {/* Current Word Display */}
-      <Box sx={{ textAlign: "center", mb: 4, py: 4, border: "2px dashed", borderColor: "primary.main", borderRadius: 4 }}>
+      <Box sx={{ textAlign: "center", mb: 4, py: 4, border: "2px dashed", borderColor: "primary.main", borderRadius: 4, flexShrink: 0 }}>
         <Typography variant="caption" sx={{ textTransform: "uppercase", letterSpacing: 2 }}>Current Word</Typography>
         <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mt: 1 }}>
           {currentWord.split("").map((char, i) => (
@@ -309,8 +310,8 @@ function LocalGameInner() {
       </Box>
 
       {/* History */}
-      <Box sx={{ flexGrow: 1, overflow: "hidden", display: "flex", flexDirection: "column", mb: 3 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+      <Box sx={{ flexGrow: 1, overflow: "hidden", display: "flex", flexDirection: "column", mb: 3, minHeight: 0 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1, flexShrink: 0 }}>
           <HistoryIcon fontSize="small" color="disabled" />
           <Typography variant="body2" color="text.secondary">Game History</Typography>
         </Box>
@@ -318,7 +319,8 @@ function LocalGameInner() {
           ref={scrollRef}
           sx={{
             flexGrow: 1, overflowY: "auto", pr: 1,
-            display: "flex", flexDirection: "column", gap: 1
+            display: "flex", flexDirection: "column", gap: 1,
+            minHeight: 0,
           }}
         >
           {gameState.history.map((word, i) => (
@@ -337,7 +339,7 @@ function LocalGameInner() {
       </Box>
 
       {/* Input */}
-      <Box sx={{ pb: 2 }}>
+      <Box sx={{ pb: 2, flexShrink: 0 }}>
         {gameState.error && (
           <Alert severity="error" sx={{ mb: 2, borderRadius: 3 }} onClose={() => setGameState(s => s ? { ...s, error: null } : null)}>
             {gameState.error}

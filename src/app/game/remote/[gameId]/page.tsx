@@ -121,9 +121,9 @@ function RemoteGameInner() {
   const isMyTurn = game.currentPlayer === player && !timedOut;
 
   return (
-    <Container maxWidth="sm" sx={{ py: 4, height: "100vh", display: "flex", flexDirection: "column" }}>
+    <Container maxWidth="sm" sx={{ py: 4, height: "100dvh", overflow: "hidden", display: "flex", flexDirection: "column" }}>
       {/* Header */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, flexShrink: 0 }}>
         <Typography variant="h3" color="secondary" sx={{ m: 0 }}>Replacle</Typography>
         <IconButton onClick={() => action("restart")} title="New Game" disabled={busy}>
           <RefreshIcon />
@@ -142,6 +142,7 @@ function RemoteGameInner() {
           justifyContent: "space-between",
           alignItems: "center",
           px: 3,
+          flexShrink: 0,
         }}
       >
         <Typography variant="h3" sx={{ m: 0, color: "inherit" }}>
@@ -159,7 +160,7 @@ function RemoteGameInner() {
       </Paper>
 
       {/* Current Word Display */}
-      <Box sx={{ textAlign: "center", mb: 4, py: 4, border: "2px dashed", borderColor: "primary.main", borderRadius: 4 }}>
+      <Box sx={{ textAlign: "center", mb: 4, py: 4, border: "2px dashed", borderColor: "primary.main", borderRadius: 4, flexShrink: 0 }}>
         <Typography variant="caption" sx={{ textTransform: "uppercase", letterSpacing: 2 }}>Current Word</Typography>
         <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mt: 1 }}>
           {currentWord.split("").map((char, i) => (
@@ -178,8 +179,8 @@ function RemoteGameInner() {
       </Box>
 
       {/* History */}
-      <Box sx={{ flexGrow: 1, overflow: "hidden", display: "flex", flexDirection: "column", mb: 3 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+      <Box sx={{ flexGrow: 1, overflow: "hidden", display: "flex", flexDirection: "column", mb: 3, minHeight: 0 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1, flexShrink: 0 }}>
           <HistoryIcon fontSize="small" color="disabled" />
           <Typography variant="body2" color="text.secondary">Game History</Typography>
         </Box>
@@ -187,7 +188,8 @@ function RemoteGameInner() {
           ref={scrollRef}
           sx={{
             flexGrow: 1, overflowY: "auto", pr: 1,
-            display: "flex", flexDirection: "column", gap: 1
+            display: "flex", flexDirection: "column", gap: 1,
+            minHeight: 0,
           }}
         >
           {game.history.map((word, i) => (
@@ -206,7 +208,7 @@ function RemoteGameInner() {
       </Box>
 
       {/* Input */}
-      <Box sx={{ pb: 2 }}>
+      <Box sx={{ pb: 2, flexShrink: 0 }}>
         {error && (
           <Alert severity="error" sx={{ mb: 2, borderRadius: 3 }} onClose={() => setActionError("")}>
             {error}
