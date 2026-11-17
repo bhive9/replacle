@@ -39,11 +39,9 @@ function TileRow({ word, goal = false }: { word: string; goal?: boolean }) {
  */
 export default function LadderGoal({ start, target, par }: LadderGoalProps) {
   return (
-    <Paper
-      elevation={0}
+    <Box
       sx={{
-        p: 1.25, mb: 3, borderRadius: 4, flexShrink: 0,
-        border: 1, borderColor: "divider",
+        px: 0.5, mb: 3, flexShrink: 0,
         display: "flex", alignItems: "center", justifyContent: "center", gap: 1,
         maxWidth: "100%",
       }}
@@ -68,6 +66,6 @@ export default function LadderGoal({ start, target, par }: LadderGoalProps) {
         </Typography>
         <TileRow word={target} goal />
       </Box>
-    </Paper>
+    </Box>
   );
 }
