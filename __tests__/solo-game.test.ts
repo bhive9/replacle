@@ -2,6 +2,8 @@
  * @jest-environment node
  */
 import {
+  PAR_BANDS,
+  shortestPath,
   shortestPathLength,
   generateSoloPuzzle,
   validateSoloMove,
@@ -103,5 +105,54 @@ describe("validateSoloMove", () => {
       accepted: false,
       error: "Must change exactly one letter!",
     });
+  });
+});
+
+import { readFileSync } from "node:fs";
+const realDictionary = new Set(
+  readFileSync("public/data/dictionary-4.txt", "utf8").split("\n").filter(Boolean)
+);
+
+describe("shortestPath", () => {
+  it("returns the word path between neighbours one hop apart", () => {
+    expect(shortestPath("cold", "cord", dictionary)).toEqual(["cold", "cord"]);
+  });
+
+  it("returns a multi-hop path whose steps are valid dictionary words", () => {
+    const path = shortestPath("cold", "cord", dictionary);
+    expect(path).not.toBeNull();
+    const far = shortestPath("cold", "warm", dictionary);
+    expect(far).not.toBeNull();
+    for (const w of far!) expect(dictionary.has(w)).toBe(true);
+    // Same length as the BFS distance helper reports.
+    expect(shortestPathLength("cold", "warm", dictionary)).toBe(far!.length - 1);
+  });
+
+  it("returns just the word when start equals target", () => {
+    expect(shortestPath("cord", "cord", dictionary)).toEqual(["cord"]);
+  });
+
+  it("returns null when no ladder exists", () => {
+    expect(shortestPath("cold", "zzzz", dictionary)).toBeNull();
+  });
+});
+
+describe("PAR_BANDS", () => {
+  it("makes easy strictly easier than medium, and medium than hard", () => {
+    expect(PAR_BANDS.easy[1]).toBeLessThan(PAR_BANDS.medium[0]);
+    expect(PAR_BANDS.medium[1]).toBeLessThan(PAR_BANDS.hard[0]);
+  });
+
+  it("lets generateSoloPuzzle honor each difficulty band", () => {
+    let i = 0;
+    const rng = () => {
+      i += 1;
+      return (i % 7) / 7;
+    };
+    for (const [min, max] of Object.values(PAR_BANDS)) {
+      const puzzle = generateSoloPuzzle(realDictionary, rng, min, max);
+      expect(puzzle.par).toBeGreaterThanOrEqual(min);
+      expect(puzzle.par).toBeLessThanOrEqual(max);
+    }
   });
 });

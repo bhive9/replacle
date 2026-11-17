@@ -1,5 +1,6 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useSoloGame } from "@/hooks/useSoloGame";
+import { shortestPathLength } from "@/lib/solo-game";
 
 // cold → cord → card → ward → warm : a clean 4-step ladder
 const dictionary = new Set(["cold", "cord", "card", "ward", "warm", "word", "wold"]);
@@ -103,7 +104,75 @@ describe("useSoloGame", () => {
     expect(saved.puzzle.target).toBe(target);
     expect(saved.history).toHaveLength(1);
   });
+
+  it("newGame uses the easy band when asked", async () => {
+    const { result } = renderHook(() => useSoloGame(true, realDictionary));
+    await waitFor(() => expect(result.current.status).toBe("playing"));
+
+    act(() => result.current.newGame("easy"));
+    await waitFor(() => expect(result.current.status).toBe("playing"));
+    expect(result.current.puzzle!.par).toBeGreaterThanOrEqual(2);
+    expect(result.current.puzzle!.par).toBeLessThanOrEqual(3);
+    expect(result.current.hintsUsed).toBe(0);
+  });
+
+  it("newGame uses the hard band when asked", async () => {
+    const { result } = renderHook(() => useSoloGame(true, realDictionary));
+    await waitFor(() => expect(result.current.status).toBe("playing"));
+
+    act(() => result.current.newGame("hard"));
+    await waitFor(() => expect(result.current.status).toBe("playing"));
+    expect(result.current.puzzle!.par).toBeGreaterThanOrEqual(6);
+    expect(result.current.puzzle!.par).toBeLessThanOrEqual(8);
+  });
+
+  it("hint plays an optimal next word and counts itself", async () => {
+    const { result } = renderHook(() => useSoloGame(true, dictionary));
+    await waitFor(() => expect(result.current.status).toBe("playing"));
+    const { start, target } = result.current.puzzle!;
+
+    act(() => result.current.hint());
+    expect(result.current.history).toHaveLength(2);
+    expect(result.current.hintsUsed).toBe(1);
+
+    // The hinted word must be one letter away and strictly closer to the target.
+    const [current, next] = result.current.history;
+    expect(shortestStep(current, next)).toBe(true);
+    const distanceBefore = shortestPathLength(start, target, dictionary);
+    const distanceAfter = shortestPathLength(next, target, dictionary);
+    expect(distanceBefore).not.toBeNull();
+    expect(distanceAfter).toBe(distanceBefore! - 1);
+
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
+    expect(saved.hintsUsed).toBe(1);
+    expect(saved.history).toEqual([start, next]);
+  });
+
+  it("hint is inert outside a playing game", async () => {
+    const { result } = renderHook(() => useSoloGame(false, dictionary));
+    expect(result.current.status).toBe("loading");
+    act(() => result.current.hint());
+    expect(result.current.hintsUsed).toBe(0);
+    expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
+  });
+
+  it("reset clears the hint count", async () => {
+    const { result } = renderHook(() => useSoloGame(true, dictionary));
+    await waitFor(() => expect(result.current.status).toBe("playing"));
+    act(() => result.current.hint());
+    expect(result.current.hintsUsed).toBe(1);
+
+    act(() => result.current.reset());
+    expect(result.current.hintsUsed).toBe(0);
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)!);
+    expect(saved.hintsUsed).toBe(0);
+  });
 });
+
+import { readFileSync } from "node:fs";
+const realDictionary = new Set(
+  readFileSync("public/data/dictionary-4.txt", "utf8").split("\n").filter(Boolean)
+);
 
 function shortestStep(a: string, b: string) {
   if (a.length !== b.length) return false;

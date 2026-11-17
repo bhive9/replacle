@@ -1,8 +1,9 @@
 "use client";
 
 import React, { Suspense, useEffect, useState } from "react";
-import { Chip, IconButton, Typography } from "@mui/material";
+import { Box, Chip, IconButton, Typography } from "@mui/material";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import LightbulbIcon from "@mui/icons-material/Lightbulb";
 import GamePageContainer from "@/components/game/GamePageContainer";
 import GameHeader from "@/components/game/GameHeader";
 import HistoryList from "@/components/game/HistoryList";
@@ -10,11 +11,15 @@ import WordInput from "@/components/game/WordInput";
 import SoloWinScreen from "@/components/game/SoloWinScreen";
 import LadderGoal from "@/components/game/LadderGoal";
 import { useSoloGame } from "@/hooks/useSoloGame";
+import { SoloDifficulty } from "@/lib/solo-game";
+
+const DIFFICULTIES: SoloDifficulty[] = ["easy", "medium", "hard"];
 
 function SoloGameInner() {
   const [dictionary, setDictionary] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [input, setInput] = useState("");
+  const [difficulty, setDifficulty] = useState<SoloDifficulty>("medium");
 
   // Same static, immutable-cached word list the other modes use.
   useEffect(() => {
@@ -27,14 +32,17 @@ function SoloGameInner() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const { status, puzzle, history, error, play, newGame, reset, clearError } = useSoloGame(
-    !isLoading && dictionary.size > 0,
-    dictionary
-  );
+  const { status, puzzle, history, error, hintsUsed, play, newGame, hint, reset, clearError } =
+    useSoloGame(!isLoading && dictionary.size > 0, dictionary);
 
   const submit = () => {
     play(input);
     setInput("");
+  };
+
+  const pickDifficulty = (d: SoloDifficulty) => {
+    setDifficulty(d);
+    newGame(d);
   };
 
   if (status === "won" && puzzle) {
@@ -43,7 +51,8 @@ function SoloGameInner() {
         moves={history.length - 1}
         par={puzzle.par}
         target={puzzle.target}
-        onPlayAgain={newGame}
+        hintsUsed={hintsUsed}
+        onPlayAgain={() => newGame(difficulty)}
       />
     );
   }
@@ -62,7 +71,20 @@ function SoloGameInner() {
 
   return (
     <GamePageContainer>
-      <GameHeader onNewGame={newGame} />
+      <GameHeader onNewGame={() => newGame(difficulty)} />
+
+      <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mb: 3, flexShrink: 0 }}>
+        {DIFFICULTIES.map((d) => (
+          <Chip
+            key={d}
+            label={d.charAt(0).toUpperCase() + d.slice(1)}
+            onClick={() => pickDifficulty(d)}
+            variant={difficulty === d ? "filled" : "outlined"}
+            color={difficulty === d ? "primary" : "default"}
+            aria-pressed={difficulty === d}
+          />
+        ))}
+      </Box>
 
       <LadderGoal start={puzzle.start} target={puzzle.target} par={puzzle.par} />
 
@@ -72,6 +94,14 @@ function SoloGameInner() {
         headerAction={
           <>
             <Chip label={`Moves: ${moves}`} size="small" variant="outlined" color="primary" />
+            <IconButton
+              onClick={hint}
+              title="Hint: reveal the next word"
+              aria-label="Hint: reveal the next word"
+              size="small"
+            >
+              <LightbulbIcon />
+            </IconButton>
             <IconButton
               onClick={reset}
               title="Reset puzzle"

@@ -28,4 +28,14 @@ describe("SoloWinScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: /new puzzle/i }));
     expect(onPlayAgain).toHaveBeenCalledTimes(1);
   });
+
+  it("mentions hints when any were used", () => {
+    renderWin({ hintsUsed: 2 });
+    expect(screen.getByText(/with 2 hints/i)).toBeInTheDocument();
+  });
+
+  it("says nothing about hints on a clean solve", () => {
+    renderWin({ hintsUsed: 0 });
+    expect(screen.queryByText(/hint/i)).not.toBeInTheDocument();
+  });
 });

@@ -9,10 +9,18 @@ interface SoloWinScreenProps {
   /** Shortest possible ladder for this puzzle. */
   par: number;
   target: string;
+  /** Hints spent on this run; omitted or zero means a clean solve. */
+  hintsUsed?: number;
   onPlayAgain: () => void;
 }
 
-export default function SoloWinScreen({ moves, par, target, onPlayAgain }: SoloWinScreenProps) {
+export default function SoloWinScreen({
+  moves,
+  par,
+  target,
+  hintsUsed,
+  onPlayAgain,
+}: SoloWinScreenProps) {
   return (
     <Container maxWidth="sm" sx={{ py: 10, textAlign: "center" }}>
       <Typography variant="h1" gutterBottom color="secondary">
@@ -23,6 +31,7 @@ export default function SoloWinScreen({ moves, par, target, onPlayAgain }: SoloW
       </Typography>
       <Typography variant="body1" sx={{ mb: 1, color: "text.secondary" }}>
         Solved in {moves} {moves === 1 ? "move" : "moves"} — par was {par}
+        {hintsUsed ? ` with ${hintsUsed} ${hintsUsed === 1 ? "hint" : "hints"}` : ""}
       </Typography>
       {moves === par && (
         <Typography variant="body1" sx={{ mb: 2, color: "success.main", fontWeight: 700 }}>

@@ -9,7 +9,43 @@ export interface SoloPuzzle {
   par: number;
 }
 
+export type SoloDifficulty = "easy" | "medium" | "hard";
+
+/** Par ranges per difficulty: the shortest ladder a puzzle may demand. */
+export const PAR_BANDS: Record<SoloDifficulty, [number, number]> = {
+  easy: [2, 3],
+  medium: [4, 5],
+  hard: [6, 8],
+};
+
 const ALPHABET = "abcdefghijklmnopqrstuvwxyz";
+
+/** Fewest one-letter hops between two words, as an explicit word path. */
+export function shortestPath(
+  start: string,
+  target: string,
+  dictionary: Set<string>
+): string[] | null {
+  if (start === target) return [start];
+  const visited = new Set([start]);
+  const queue: Array<{ word: string; path: string[] }> = [{ word: start, path: [start] }];
+
+  while (queue.length > 0) {
+    const { word, path } = queue.shift()!;
+    for (let i = 0; i < word.length; i++) {
+      for (const letter of ALPHABET) {
+        if (letter === word[i]) continue;
+        const candidate = word.slice(0, i) + letter + word.slice(i + 1);
+        if (!dictionary.has(candidate) || visited.has(candidate)) continue;
+        const nextPath = [...path, candidate];
+        if (candidate === target) return nextPath;
+        visited.add(candidate);
+        queue.push({ word: candidate, path: nextPath });
+      }
+    }
+  }
+  return null;
+}
 
 /**
  * Fewest one-letter hops from start to target over the dictionary,

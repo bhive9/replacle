@@ -32,7 +32,7 @@ export default function HistoryList({
     <Box sx={{ flexGrow: 1, overflow: "hidden", display: "flex", flexDirection: "column", mb: 3, minHeight: 0 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1, flexShrink: 0 }}>
         <HistoryIcon fontSize="small" color="disabled" />
-        <Typography variant="body2" color="text.secondary">Game History</Typography>
+        <Typography variant="body2" color="text.secondary">History</Typography>
         {headerAction && <Box sx={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 1 }}>{headerAction}</Box>}
       </Box>
       <Box
