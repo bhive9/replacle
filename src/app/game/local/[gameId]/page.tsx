@@ -18,6 +18,7 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import HistoryIcon from "@mui/icons-material/History";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { isOneLetterDifferent, checkGameOver, TURN_TIME_LIMIT } from "@/lib/game-logic";
+import TurnCountdown from "@/components/TurnCountdown";
 
 import { GameState } from "@/lib/game-state";
 
@@ -32,8 +33,6 @@ function LocalGameInner() {
   const [startingWords, setStartingWords] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const turnStartRef = useRef<number | null>(null);
   const startedRef = useRef(false);
 
   // Load dictionary and starting words
@@ -41,7 +40,7 @@ function LocalGameInner() {
     async function loadData() {
       try {
         const [dictRes, startRes] = await Promise.all([
-          fetch("/data/dictionary.txt"),
+          fetch("/data/dictionary-4.txt"),
           fetch("/data/starting_words.txt"),
         ]);
         const dictText = await dictRes.text();
@@ -89,7 +88,6 @@ function LocalGameInner() {
     
     setGameState(newState);
     setInput("");
-    turnStartRef.current = now;
     saveGameState(newState);
   }, [gameState, startingWords, saveGameState]);
 
@@ -129,57 +127,20 @@ function LocalGameInner() {
     startNewGame();
   }, [gameState?.status, startingWords.length, gameState, startNewGame]);
 
-  const gameStatus = gameState?.status;
   const turnStartTime = gameState?.turnStartTime ?? null;
 
-  // Timer countdown effect
-  useEffect(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-
-    if (gameStatus !== "playing" || !turnStartTime) {
-      return;
-    }
-
-    turnStartRef.current = turnStartTime;
-
-    const updateTimer = () => {
-      if (!turnStartRef.current) return;
-
-      const elapsed = Math.floor((Date.now() - turnStartRef.current) / 1000);
-      const remaining = Math.max(0, TURN_TIME_LIMIT - elapsed);
-
-      setGameState(s => {
-        // Return the same state when nothing changed to avoid re-render loops.
-        if (!s || s.status !== "playing" || s.timeRemaining === remaining) return s;
-        if (remaining <= 0) {
-          if (timerRef.current) {
-            clearInterval(timerRef.current);
-            timerRef.current = null;
-          }
-          return {
-            ...s,
-            status: "game_over",
-            winner: s.currentPlayer === 1 ? 2 : 1,
-            timeRemaining: 0,
-          };
-        }
-        return { ...s, timeRemaining: remaining };
-      });
-    };
-
-    timerRef.current = setInterval(updateTimer, 1000);
-
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-    // The interval is re-armed whenever the turn or game status changes.
-  }, [gameStatus, turnStartTime]);
+  // Serverless-free timeout: the countdown component calls back once at zero.
+  const handleTimeout = useCallback(() => {
+    setGameState(s => {
+      if (!s || s.status !== "playing") return s;
+      return {
+        ...s,
+        status: "game_over",
+        winner: s.currentPlayer === 1 ? 2 : 1,
+        timeRemaining: 0,
+      };
+    });
+  }, []);
 
   const handleMove = useCallback(() => {
     if (!gameState || !input.trim()) return;
@@ -222,9 +183,6 @@ function LocalGameInner() {
     setGameState(newState);
     setInput("");
     saveGameState(newState);
-    if (!gameOver) {
-      turnStartRef.current = now;
-    }
   }, [gameState, input, dictionary, saveGameState]);
 
   // Auto-scroll history
@@ -323,7 +281,11 @@ function LocalGameInner() {
           {currentPlayerName}&apos;s Turn
         </Typography>
         <Typography variant="h3" sx={{ m: 0, color: "inherit", fontWeight: 700 }}>
-          {gameState.timeRemaining}s
+          <TurnCountdown
+            key={turnStartTime ?? "no-turn"}
+            turnStartTime={turnStartTime}
+            onTimeout={handleTimeout}
+          />
         </Typography>
       </Paper>
 

@@ -17,7 +17,7 @@ import {
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import HistoryIcon from "@mui/icons-material/History";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { TURN_TIME_LIMIT } from "@/lib/game-logic";
+import TurnCountdown from "@/components/TurnCountdown";
 import type { RemoteGame } from "@/lib/remote-db";
 
 function RemoteGameInner() {
@@ -29,7 +29,9 @@ function RemoteGameInner() {
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [now, setNow] = useState(() => Date.now());
+  // Tracks which turn the local timeout edge fired for; a new turnStartTime
+  // automatically re-enables input without a reset effect.
+  const [timedOutForTurn, setTimedOutForTurn] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Poll game state; timeouts are decided server-side.
@@ -51,12 +53,6 @@ function RemoteGameInner() {
     const interval = setInterval(refresh, 1500);
     return () => { stopped = true; clearInterval(interval); };
   }, [gameId, player, router]);
-
-  // Re-render for the countdown display; the server owns the real timeout.
-  useEffect(() => {
-    const interval = setInterval(() => setNow(Date.now()), 250);
-    return () => clearInterval(interval);
-  }, []);
 
   // Auto-scroll history
   useEffect(() => {
@@ -135,10 +131,8 @@ function RemoteGameInner() {
 
   const currentWord = game.history[game.history.length - 1] ?? "";
   const currentPlayerName = game.currentPlayer === 1 ? game.player1Name : game.player2Name;
-  const remaining = game.turnStartTime === null
-    ? TURN_TIME_LIMIT
-    : Math.max(0, Math.ceil(TURN_TIME_LIMIT - (now - game.turnStartTime) / 1000));
-  const isMyTurn = game.currentPlayer === player && remaining > 0;
+  const timedOut = timedOutForTurn !== null && timedOutForTurn === game.turnStartTime;
+  const isMyTurn = game.currentPlayer === player && !timedOut;
 
   return (
     <Container maxWidth="sm" sx={{ py: 4, height: "100vh", display: "flex", flexDirection: "column" }}>
@@ -168,7 +162,13 @@ function RemoteGameInner() {
           {currentPlayerName}&apos;s Turn
         </Typography>
         <Typography variant="h3" sx={{ m: 0, color: "inherit", fontWeight: 700 }}>
-          {remaining}s
+          <TurnCountdown
+            key={game.turnStartTime ?? "no-turn"}
+            turnStartTime={game.turnStartTime}
+            tickMs={250}
+            rounding="ceil"
+            onTimeout={() => setTimedOutForTurn(game.turnStartTime)}
+          />
         </Typography>
       </Paper>
 

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Montserrat, JetBrains_Mono } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import ThemeRegistry from "./theme-provider";
 import "./globals.css";
 
@@ -7,11 +7,7 @@ const montserrat = Montserrat({
   weight: ["400", "500", "700"],
   subsets: ["latin"],
   variable: "--font-montserrat",
-});
-
-const jetbrains = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -38,7 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${montserrat.variable} ${jetbrains.variable}`}>
+    <html lang="en" className={montserrat.variable}>
       <body>
         <ThemeRegistry>{children}</ThemeRegistry>
       </body>
