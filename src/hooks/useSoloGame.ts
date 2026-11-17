@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   SoloPuzzle,
   generateSoloPuzzle,
@@ -68,12 +68,13 @@ export function useSoloGame(ready: boolean, dictionary: Set<string>) {
     [dictionary]
   );
 
-  useEffect(() => {
-    if (!ready || dictionary.size === 0) return;
+  // Derive the game during render when the dictionary first becomes available
+  // (React's "adjust state when a prop changes" pattern — no init effect).
+  const [initializedFor, setInitializedFor] = useState<Set<string> | null>(null);
+  if (ready && dictionary.size > 0 && initializedFor !== dictionary) {
+    setInitializedFor(dictionary);
     beginGame(loadSaved(dictionary));
-    // Runs once per dictionary load; beginGame is stable for a given dictionary.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, dictionary]);
+  }
 
   const play = useCallback(
     (word: string) => {

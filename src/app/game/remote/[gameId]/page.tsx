@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { Alert, Box, Paper, Typography } from "@mui/material";
+import { Alert, Paper, Typography } from "@mui/material";
 import TurnCountdown from "@/components/TurnCountdown";
 import { useRemoteGameStream } from "@/hooks/useRemoteGameStream";
 import GamePageContainer from "@/components/game/GamePageContainer";

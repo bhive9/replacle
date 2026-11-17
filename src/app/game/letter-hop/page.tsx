@@ -1,7 +1,7 @@
 "use client";
 
 import React, { Suspense, useEffect, useState } from "react";
-import { Box, Chip, IconButton, Paper, Typography } from "@mui/material";
+import { Chip, IconButton, Typography } from "@mui/material";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import GamePageContainer from "@/components/game/GamePageContainer";
 import GameHeader from "@/components/game/GameHeader";

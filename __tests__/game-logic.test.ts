@@ -2,7 +2,6 @@ import {
   isOneLetterDifferent,
   getValidMoves,
   checkGameOver,
-  TURN_TIME_LIMIT,
 } from "@/lib/game-logic";
 
 describe("isOneLetterDifferent", () => {
