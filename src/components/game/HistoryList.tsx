@@ -52,7 +52,7 @@ export default function HistoryList({
               sx={{
                 display: "flex",
                 justifyContent:
-                  layout === "linear" ? "flex-start" : i % 2 === 0 ? "flex-start" : "flex-end",
+                  layout === "linear" ? "center" : i % 2 === 0 ? "flex-start" : "flex-end",
               }}
             >
               <Chip
