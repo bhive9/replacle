@@ -65,6 +65,29 @@ describe("useSoloGame", () => {
     expect(saved.history).toEqual([start]);
   });
 
+  it("respects the initial difficulty band for a fresh game", async () => {
+    const { result } = renderHook(() => useSoloGame(true, realDictionary, "easy"));
+    await waitFor(() => expect(result.current.status).toBe("playing"));
+    const par = result.current.puzzle!.par;
+    expect(par).toBeGreaterThanOrEqual(2);
+    expect(par).toBeLessThanOrEqual(3);
+  });
+
+  it("exposes a rewind notice after revisiting a word", async () => {
+    const { result } = renderHook(() => useSoloGame(true, dictionary));
+    await waitFor(() => expect(result.current.status).toBe("playing"));
+    const start = result.current.puzzle!.start;
+    const first = [...dictionary].find((w) => w !== start && shortestStep(start, w))!;
+    if (first === result.current.puzzle!.target) return;
+
+    act(() => result.current.play(first));
+    act(() => result.current.play(start));
+    expect(result.current.lastRewind).toEqual({ word: start, discarded: 1 });
+
+    act(() => result.current.play(start)); // rewinding again to a 1-length ladder
+    expect(result.current.lastRewind).toEqual({ word: start, discarded: 0 });
+  });
+
   it("rejects an illegal move without touching history", async () => {
     const { result } = renderHook(() => useSoloGame(true, dictionary));
     await waitFor(() => expect(result.current.status).toBe("playing"));

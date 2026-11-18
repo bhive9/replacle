@@ -15,7 +15,13 @@ export default function GameHeader({ onNewGame, newGameDisabled }: GameHeaderPro
       <Typography variant="h3" component="h1" color="secondary" sx={{ m: 0 }}>
         Replacle
       </Typography>
-      <IconButton onClick={onNewGame} title="New Game" aria-label="New game" disabled={newGameDisabled}>
+      <IconButton
+        onClick={onNewGame}
+        title="New Game"
+        aria-label="New game"
+        disabled={newGameDisabled}
+        sx={{ width: "2.75rem", height: "2.75rem" }}
+      >
         <RefreshIcon />
       </IconButton>
     </Box>

@@ -26,7 +26,14 @@ export default function SoloWinScreen({
       <Typography variant="h1" gutterBottom color="secondary">
         Replacle
       </Typography>
-      <Typography variant="h2" gutterBottom color="success.main" sx={{ mt: 2 }}>
+      <Typography
+        variant="h2"
+        gutterBottom
+        color="success.main"
+        sx={{ mt: 2 }}
+        tabIndex={-1}
+        ref={(el) => el?.focus()}
+      >
         🎉 You made it to {target.toUpperCase()}!
       </Typography>
       <Typography variant="body1" sx={{ mb: 1, color: "text.secondary" }}>

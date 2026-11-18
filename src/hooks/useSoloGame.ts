@@ -51,17 +51,27 @@ function loadSaved(dictionary: Set<string>): SavedSoloGame | null {
  * Single-player word ladder, entirely on-device: the puzzle is generated in
  * the browser and the run survives reloads via localStorage.
  */
-export function useSoloGame(ready: boolean, dictionary: Set<string>) {
+export function useSoloGame(
+  ready: boolean,
+  dictionary: Set<string>,
+  initialDifficulty: SoloDifficulty = "medium"
+) {
   const [puzzle, setPuzzle] = useState<SoloPuzzle | null>(null);
   const [history, setHistory] = useState<string[]>([]);
   const [status, setStatus] = useState<SoloStatus>("loading");
   const [error, setError] = useState<string | null>(null);
   const [hintsUsed, setHintsUsed] = useState(0);
+  const [lastRewind, setLastRewind] = useState<{ word: string; discarded: number } | null>(null);
 
   const beginGame = useCallback(
     (saved: SavedSoloGame | null, band?: readonly [number, number]) => {
       const game = saved ?? {
-        puzzle: generateSoloPuzzle(dictionary, Math.random, band?.[0], band?.[1]),
+        puzzle: generateSoloPuzzle(
+          dictionary,
+          Math.random,
+          band?.[0] ?? PAR_BANDS[initialDifficulty][0],
+          band?.[1] ?? PAR_BANDS[initialDifficulty][1]
+        ),
         history: [],
         hintsUsed: 0,
       } satisfies SavedSoloGame;
@@ -71,9 +81,10 @@ export function useSoloGame(ready: boolean, dictionary: Set<string>) {
       setPuzzle(game.puzzle);
       setHistory(game.history.length > 0 ? game.history : [game.puzzle.start]);
       setHintsUsed(game.hintsUsed ?? 0);
+      setLastRewind(null);
       setStatus("playing");
     },
-    [dictionary]
+    [dictionary, initialDifficulty]
   );
 
   // Derive the game during render when the dictionary first becomes available
@@ -96,6 +107,14 @@ export function useSoloGame(ready: boolean, dictionary: Set<string>) {
         result.rewindTo !== undefined
           ? history.slice(0, result.rewindTo + 1) // revisited word: rewind to that rung
           : [...history, word.trim().toLowerCase()];
+      if (result.rewindTo !== undefined) {
+        setLastRewind({
+          word: word.trim().toLowerCase(),
+          discarded: history.length - 1 - result.rewindTo,
+        });
+      } else {
+        setLastRewind(null);
+      }
       setHistory(nextHistory);
       setError(null);
       if (result.won) {
@@ -125,6 +144,7 @@ export function useSoloGame(ready: boolean, dictionary: Set<string>) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
     setHistory([puzzle.start]);
     setHintsUsed(0);
+    setLastRewind(null);
     setStatus("playing");
     setError(null);
   }, [puzzle]);
@@ -152,6 +172,7 @@ export function useSoloGame(ready: boolean, dictionary: Set<string>) {
     history,
     error,
     hintsUsed,
+    lastRewind,
     play,
     newGame,
     hint,

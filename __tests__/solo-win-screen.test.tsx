@@ -29,6 +29,11 @@ describe("SoloWinScreen", () => {
     expect(onPlayAgain).toHaveBeenCalledTimes(1);
   });
 
+  it("moves focus to the win announcement so keyboard users land on the screen", () => {
+    renderWin();
+    expect(screen.getByRole("heading", { name: /you made it/i })).toHaveFocus();
+  });
+
   it("mentions hints when any were used", () => {
     renderWin({ hintsUsed: 2 });
     expect(screen.getByText(/with 2 hints/i)).toBeInTheDocument();
