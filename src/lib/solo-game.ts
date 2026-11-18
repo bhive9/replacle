@@ -135,10 +135,13 @@ export function generateSoloPuzzle(
 }
 
 export type SoloMoveResult =
-  | { accepted: true; won: boolean }
+  | { accepted: true; won: boolean; /** Index in history the player rewound to (revisited word). */ rewindTo?: number }
   | { accepted: false; error: string };
 
-/** Same word rules as the multiplayer modes; playing the target wins. */
+/**
+ * Word rules for the solo ladder: one-letter steps, and replaying a word the
+ * history already contains rewinds the ladder back to that rung.
+ */
 export function validateSoloMove(
   history: string[],
   target: string,
@@ -147,7 +150,8 @@ export function validateSoloMove(
 ): SoloMoveResult {
   const w = word.trim().toLowerCase();
   if (w.length !== 4) return { accepted: false, error: "Word must be 4 letters long!" };
-  if (history.includes(w)) return { accepted: false, error: "Word already used!" };
+  const seenAt = history.indexOf(w);
+  if (seenAt !== -1) return { accepted: true, won: false, rewindTo: seenAt };
   if (!dictionary.has(w)) return { accepted: false, error: "That's not in my dictionary!" };
   if (!isOneLetterDifferent(history[history.length - 1], w)) {
     return { accepted: false, error: "Must change exactly one letter!" };

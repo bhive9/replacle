@@ -86,10 +86,19 @@ describe("validateSoloMove", () => {
     });
   });
 
-  it("rejects repeats", () => {
-    expect(validateSoloMove([start, "cord"], target, "cold", dictionary)).toEqual({
-      accepted: false,
-      error: "Word already used!",
+  it("accepts a repeated word as a rewind to that rung", () => {
+    expect(validateSoloMove([start, "cord", "card"], target, "cord", dictionary)).toEqual({
+      accepted: true,
+      rewindTo: 1,
+      won: false,
+    });
+  });
+
+  it("accepts a rewind back to the start word", () => {
+    expect(validateSoloMove([start, "cord"], target, start, dictionary)).toEqual({
+      accepted: true,
+      rewindTo: 0,
+      won: false,
     });
   });
 

@@ -92,7 +92,10 @@ export function useSoloGame(ready: boolean, dictionary: Set<string>) {
         setError(result.error);
         return;
       }
-      const nextHistory = [...history, word.trim().toLowerCase()];
+      const nextHistory =
+        result.rewindTo !== undefined
+          ? history.slice(0, result.rewindTo + 1) // revisited word: rewind to that rung
+          : [...history, word.trim().toLowerCase()];
       setHistory(nextHistory);
       setError(null);
       if (result.won) {

@@ -49,6 +49,22 @@ describe("useSoloGame", () => {
     expect(reloaded.result.current.puzzle!.target).toBe(target);
   });
 
+  it("rewinds to a word already in the history", async () => {
+    const { result } = renderHook(() => useSoloGame(true, dictionary));
+    await waitFor(() => expect(result.current.status).toBe("playing"));
+    const start = result.current.puzzle!.start;
+    const first = [...dictionary].find((w) => w !== start && shortestStep(start, w))!;
+    if (first === result.current.puzzle!.target) return;
+
+    act(() => result.current.play(first));
+    act(() => result.current.play(start)); // revisit the start word
+    expect(result.current.history).toEqual([start]);
+    expect(result.current.error).toBeNull();
+
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)!);
+    expect(saved.history).toEqual([start]);
+  });
+
   it("rejects an illegal move without touching history", async () => {
     const { result } = renderHook(() => useSoloGame(true, dictionary));
     await waitFor(() => expect(result.current.status).toBe("playing"));
